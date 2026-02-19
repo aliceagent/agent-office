@@ -3113,10 +3113,9 @@
         
         function useDemoData() {
             console.log('🦜 Using demo data (worker unavailable)');
-            // Test data - Beta now has a task!
+            // Test data - Beta's task is COMPLETE, back to sleep!
             currentTasks = [
-                { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' },
-                { taskId: 'OFF-1-1', assignee: 'Beta', status: 'In Progress', url: 'https://notion.so/beta-walk-test' }
+                { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' }
             ];
             lastSyncTime = new Date().toISOString();
             lastSyncError = 'Worker unavailable - using demo data';
