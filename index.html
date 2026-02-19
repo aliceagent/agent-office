@@ -1462,14 +1462,50 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+        .agent-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #4caf50;
+        }
+        
         .agent-emoji {
             font-size: 32px;
+        }
+        
+        .agent-header-text {
+            flex: 1;
         }
 
         .agent-header h3 {
             margin: 0;
             font-size: 18px;
             color: #fff;
+        }
+        
+        .task-badge-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            background: rgba(25, 118, 210, 0.2);
+            border-radius: 8px;
+            border-left: 3px solid #1976d2;
+        }
+        
+        .task-badge-label {
+            color: #90caf9;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .task-badge-id {
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: monospace;
         }
 
         .agent-status {
@@ -1923,16 +1959,22 @@
     <div class="agent-popover" id="agentPopover">
         <div class="popover-content">
             <div class="agent-header">
-                <span class="agent-emoji"></span>
-                <h3 class="agent-name"></h3>
-                <div class="agent-status"></div>
+                <img class="agent-avatar" src="" alt="Agent Avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <span class="agent-emoji" style="display:none;"></span>
+                <div class="agent-header-text">
+                    <h3 class="agent-name"></h3>
+                    <div class="agent-status"></div>
+                </div>
+            </div>
+            <div class="task-badge-section">
+                <span class="task-badge-label">Task:</span>
+                <span class="task-badge-id"></span>
             </div>
             <div class="current-task">
-                <strong>Current Task:</strong>
                 <span class="task-info"></span>
             </div>
             <div class="popover-actions">
-                <a href="#" class="notion-link" target="_blank">View Tasks in Notion</a>
+                <a href="#" class="notion-link" target="_blank">📋 View in Notion</a>
             </div>
         </div>
     </div>
@@ -2224,48 +2266,55 @@
             'alice': {
                 name: 'Alice',
                 emoji: '🦜',
+                avatar: 'https://aliceagent.github.io/agent-office/avatars/alice.png',
                 status: 'working',
                 currentTask: 'Building Office Canvas Interface',
                 taskId: 'OFFICE-1-1'
             },
             'alpha': {
-                name: 'Alpha',
+                name: 'Worker-Alpha',
                 emoji: '🐺',
+                avatar: 'https://aliceagent.github.io/agent-office/avatars/alpha.png',
                 status: 'working',
                 currentTask: 'Sprite System Implementation',
                 taskId: 'OFFICE-1-2'
             },
             'beta': {
-                name: 'Beta',
+                name: 'Worker-Beta',
                 emoji: '🦊',
+                avatar: 'https://aliceagent.github.io/agent-office/avatars/beta.png',
                 status: 'offline',
                 currentTask: 'No active tasks',
                 taskId: null
             },
             'gamma': {
-                name: 'Gamma',
+                name: 'Worker-Gamma',
                 emoji: '🦔',
+                avatar: 'https://aliceagent.github.io/agent-office/avatars/gamma.png',
                 status: 'offline',
                 currentTask: 'No active tasks',
                 taskId: null
             },
             'delta': {
-                name: 'Delta',
+                name: 'Worker-Delta',
                 emoji: '🦉',
+                avatar: 'https://aliceagent.github.io/agent-office/avatars/delta.png',
                 status: 'offline',
                 currentTask: 'No active tasks',
                 taskId: null
             },
             'epsilon': {
-                name: 'Epsilon',
+                name: 'Worker-Epsilon',
                 emoji: '🐙',
+                avatar: 'https://aliceagent.github.io/agent-office/avatars/epsilon.png',
                 status: 'offline',
                 currentTask: 'No active tasks',
                 taskId: null
             },
             'zeta': {
-                name: 'Zeta',
+                name: 'Worker-Zeta',
                 emoji: '🦄',
+                avatar: 'https://aliceagent.github.io/agent-office/avatars/zeta.png',
                 status: 'working',
                 currentTask: 'Testing Infrastructure',
                 taskId: 'OFFICE-1-3'
@@ -2294,18 +2343,42 @@
             if (!agent) return;
             
             // Update popover content
-            popover.querySelector('.agent-emoji').textContent = agent.emoji;
+            const avatarEl = popover.querySelector('.agent-avatar');
+            const emojiEl = popover.querySelector('.agent-emoji');
+            
+            // Show avatar if available, otherwise show emoji
+            if (agent.avatar) {
+                avatarEl.src = agent.avatar;
+                avatarEl.style.display = 'block';
+                emojiEl.style.display = 'none';
+            } else {
+                avatarEl.style.display = 'none';
+                emojiEl.style.display = 'block';
+                emojiEl.textContent = agent.emoji;
+            }
+            
             popover.querySelector('.agent-name').textContent = agent.name;
-            popover.querySelector('.task-info').textContent = agent.currentTask;
+            popover.querySelector('.task-info').textContent = agent.currentTask || 'No active tasks';
+            
+            // Update task badge
+            const taskBadgeSection = popover.querySelector('.task-badge-section');
+            const taskBadgeId = popover.querySelector('.task-badge-id');
+            if (agent.taskId) {
+                taskBadgeId.textContent = agent.taskId;
+                taskBadgeSection.style.display = 'flex';
+            } else {
+                taskBadgeSection.style.display = 'none';
+            }
             
             const statusEl = popover.querySelector('.agent-status');
-            statusEl.textContent = agent.status;
+            statusEl.textContent = agent.status === 'working' ? 'WORKING' : agent.status === 'offline' ? 'SLEEPING' : agent.status.toUpperCase();
             statusEl.className = 'agent-status ' + agent.status;
             
             // Update Notion link
             const notionLink = popover.querySelector('.notion-link');
-            if (agent.taskId && taskNotionPageIds[agent.taskId]) {
-                notionLink.href = `https://notion.so/${taskNotionPageIds[agent.taskId]}`;
+            if (agent.taskId) {
+                const pageId = taskNotionPageIds[agent.taskId];
+                notionLink.href = pageId ? `https://notion.so/${pageId}` : 'https://www.notion.so/2fe419064d3081bc8155ee2719c1d365';
                 notionLink.style.display = 'inline-flex';
             } else {
                 notionLink.style.display = 'none';
