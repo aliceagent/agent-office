@@ -23,12 +23,14 @@
         
         .office-container {
             position: relative;
-            width: 900px;
-            height: 600px;
+            width: clamp(320px, 90vw, 1440px);
+            height: clamp(240px, 50vw, 800px);
+            max-width: 1440px;
             background: linear-gradient(135deg, #f5f0e8 0%, #e8e0d5 100%);
-            border-radius: 12px;
+            border-radius: clamp(4px, 1vw, 12px);
             box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             overflow: hidden;
+            container-type: inline-size;
         }
         
         /* Floor */
@@ -862,6 +864,122 @@
             border-color: #adb5bd;
             color: #495057;
         }
+
+        /* Responsive Container Queries for Overlap Prevention */
+        @container (max-width: 480px) {
+            .workstation-row {
+                flex-wrap: wrap;
+                bottom: 5px;
+                left: 5px;
+                gap: 5px;
+                max-width: calc(100% - 10px);
+            }
+            
+            .workstation {
+                width: clamp(40px, 12vw, 50px);
+                height: clamp(30px, 9vw, 40px);
+                font-size: clamp(12px, 3vw, 16px);
+            }
+            
+            .pool-table {
+                width: clamp(120px, 30vw, 150px);
+                height: clamp(70px, 18vw, 85px);
+                top: 40%;
+                left: 50%;
+            }
+            
+            .couch {
+                width: clamp(80px, 25vw, 100px);
+                height: clamp(35px, 12vw, 45px);
+                bottom: 80px;
+                left: 15px;
+            }
+            
+            .bookshelf {
+                width: clamp(200px, 80vw, 400px);
+                height: clamp(80px, 20vw, 110px);
+                top: 20px;
+            }
+            
+            .portraits-gallery {
+                gap: 4px;
+                top: 3px;
+            }
+            
+            .portrait {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+        }
+
+        @container (min-width: 481px) and (max-width: 768px) {
+            .workstation-row {
+                bottom: 8px;
+                left: 15px;
+                gap: 8px;
+            }
+            
+            .workstation {
+                width: clamp(50px, 8vw, 55px);
+                height: clamp(38px, 6vw, 42px);
+            }
+            
+            .pool-table {
+                width: clamp(140px, 25vw, 160px);
+                height: clamp(80px, 15vw, 90px);
+                top: 45%;
+                left: 40%;
+            }
+            
+            .couch {
+                width: clamp(100px, 20vw, 110px);
+                height: clamp(40px, 8vw, 48px);
+                bottom: 100px;
+                left: 25px;
+            }
+            
+            .bookshelf {
+                width: clamp(350px, 70vw, 450px);
+                height: clamp(100px, 18vw, 120px);
+                top: 25px;
+            }
+        }
+
+        @container (min-width: 769px) and (max-width: 1024px) {
+            .pool-table {
+                width: clamp(160px, 20vw, 180px);
+                height: clamp(90px, 12vw, 100px);
+                top: 50%;
+                left: 35%;
+            }
+            
+            .workstation-row {
+                bottom: 10px;
+                left: 20px;
+                gap: 10px;
+            }
+        }
+
+        @container (min-width: 1025px) {
+            .office-container {
+                width: clamp(900px, 80vw, 1440px);
+                height: clamp(600px, 45vw, 900px);
+            }
+            
+            .pool-table {
+                width: 200px;
+                height: 110px;
+            }
+        }
+
+        /* Prevent overlaps with z-index management */
+        .workstation-row { z-index: 10; }
+        .pool-table { z-index: 5; }
+        .couch { z-index: 6; }
+        .armchair { z-index: 6; }
+        .portraits-gallery { z-index: 15; }
+        .bookshelf { z-index: 8; }
     </style>
 </head>
 <body>
