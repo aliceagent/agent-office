@@ -2887,21 +2887,28 @@
                 previousAgentStates[key] = newStates[key];
             });
             
-            // Clear all existing badges and working status
+            // Update UI based on new states (without animation if no change)
             document.querySelectorAll('.workstation').forEach(workstation => {
                 const badge = workstation.querySelector('.ticket-badge');
                 const statusDot = workstation.querySelector('.status-dot');
                 const agentKey = workstation.getAttribute('data-agent');
+                const bed = document.querySelector(`.cot[data-agent="${agentKey}"]`);
+                const isWorking = newStates[agentKey]?.working || false;
                 
+                // Clear badge first
                 badge.textContent = '';
                 badge.style.display = 'none';
-                workstation.classList.remove('working');
-                statusDot.classList.remove('working');
                 
-                // Also update the matching bed - agent goes to bed when not working
-                const bed = document.querySelector(`.cot[data-agent="${agentKey}"]`);
-                if (bed) {
-                    bed.classList.remove('working');
+                if (isWorking) {
+                    // Agent is working - show at desk
+                    workstation.classList.add('working');
+                    statusDot.classList.add('working');
+                    if (bed) bed.classList.add('working');
+                } else {
+                    // Agent is sleeping - show in bed
+                    workstation.classList.remove('working');
+                    statusDot.classList.remove('working');
+                    if (bed) bed.classList.remove('working');
                 }
             });
 
