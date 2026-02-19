@@ -1055,6 +1055,120 @@
         .lighting-night .night-lamp {
             opacity: 1;
         }
+
+        /* Agent Popover */
+        .agent-popover {
+            position: fixed;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 280px;
+            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .agent-popover.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+        }
+
+        .popover-content {
+            color: white;
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .agent-emoji {
+            font-size: 32px;
+        }
+
+        .agent-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .agent-status {
+            margin-left: auto;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .agent-status.working {
+            background: #4caf50;
+            color: white;
+        }
+
+        .agent-status.idle {
+            background: #ff9800;
+            color: white;
+        }
+
+        .agent-status.offline {
+            background: #666;
+            color: #ccc;
+        }
+
+        .current-task {
+            margin-bottom: 16px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .current-task strong {
+            color: #64b5f6;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .task-info {
+            color: #e0e0e0;
+        }
+
+        .popover-actions {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 12px;
+        }
+
+        .notion-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #2196f3;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s ease;
+        }
+
+        .notion-link:hover {
+            background: #1976d2;
+        }
+
+        .notion-link::before {
+            content: '📝';
+        }
     </style>
 </head>
 <body>
@@ -1224,6 +1338,24 @@
             <div class="status-item"><span class="icon">🦜</span> Alice — Working</div>
             <div class="status-item"><span class="icon">🐺</span> Alpha — Idle</div>
             <div class="status-item"><span class="icon">🦊</span> Beta — Off</div>
+        </div>
+    </div>
+    
+    <!-- Agent Popover -->
+    <div class="agent-popover" id="agentPopover">
+        <div class="popover-content">
+            <div class="agent-header">
+                <span class="agent-emoji"></span>
+                <h3 class="agent-name"></h3>
+                <div class="agent-status"></div>
+            </div>
+            <div class="current-task">
+                <strong>Current Task:</strong>
+                <span class="task-info"></span>
+            </div>
+            <div class="popover-actions">
+                <a href="#" class="notion-link" target="_blank">View Tasks in Notion</a>
+            </div>
         </div>
     </div>
     
@@ -1408,6 +1540,128 @@
             }
         }
         
+        // Agent popover system
+        const agentData = {
+            'alice': {
+                name: 'Alice',
+                emoji: '🦜',
+                status: 'working',
+                currentTask: 'Building Office Canvas Interface',
+                taskId: 'OFFICE-1-1'
+            },
+            'alpha': {
+                name: 'Alpha',
+                emoji: '🐺',
+                status: 'working',
+                currentTask: 'Sprite System Implementation',
+                taskId: 'OFFICE-1-2'
+            },
+            'beta': {
+                name: 'Beta',
+                emoji: '🦊',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            },
+            'gamma': {
+                name: 'Gamma',
+                emoji: '🦔',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            },
+            'delta': {
+                name: 'Delta',
+                emoji: '🦉',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            },
+            'epsilon': {
+                name: 'Epsilon',
+                emoji: '🐙',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            },
+            'zeta': {
+                name: 'Zeta',
+                emoji: '🦄',
+                status: 'working',
+                currentTask: 'Testing Infrastructure',
+                taskId: 'OFFICE-1-3'
+            },
+            'eta': {
+                name: 'Eta',
+                emoji: '🐼',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            },
+            'theta': {
+                name: 'Theta',
+                emoji: '🦝',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            }
+        };
+
+        function showAgentPopover(agentId, event) {
+            event.stopPropagation();
+            const popover = document.getElementById('agentPopover');
+            const agent = agentData[agentId];
+            
+            if (!agent) return;
+            
+            // Update popover content
+            popover.querySelector('.agent-emoji').textContent = agent.emoji;
+            popover.querySelector('.agent-name').textContent = agent.name;
+            popover.querySelector('.task-info').textContent = agent.currentTask;
+            
+            const statusEl = popover.querySelector('.agent-status');
+            statusEl.textContent = agent.status;
+            statusEl.className = 'agent-status ' + agent.status;
+            
+            // Update Notion link
+            const notionLink = popover.querySelector('.notion-link');
+            if (agent.taskId && taskNotionPageIds[agent.taskId]) {
+                notionLink.href = `https://notion.so/${taskNotionPageIds[agent.taskId]}`;
+                notionLink.style.display = 'inline-flex';
+            } else {
+                notionLink.style.display = 'none';
+            }
+            
+            // Position popover near the workstation
+            const rect = event.target.closest('.workstation').getBoundingClientRect();
+            popover.style.left = (rect.left + rect.width / 2 - 150) + 'px';
+            popover.style.top = (rect.top - 220) + 'px';
+            
+            // Show popover
+            popover.classList.add('show');
+        }
+
+        function hideAgentPopover() {
+            document.getElementById('agentPopover').classList.remove('show');
+        }
+
+        // Add click handlers to workstations
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.workstation').forEach(workstation => {
+                workstation.addEventListener('click', (e) => {
+                    const agentId = workstation.getAttribute('data-agent');
+                    showAgentPopover(agentId, e);
+                });
+            });
+            
+            // Hide popover when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.agent-popover') && !e.target.closest('.workstation')) {
+                    hideAgentPopover();
+                }
+            });
+        });
+
         // Initialize
         generateBooks();
         updateLighting();
