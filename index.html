@@ -1492,6 +1492,218 @@
         };
     </script>
 
+    <!-- 🗺️ AGENT LOCATION AWARENESS SYSTEM -->
+    <script>
+        // Agent location states and positions
+        const AGENT_LOCATIONS = {
+            desk: 'workstation', // agents at their workstations
+            pool: { x: 400, y: 280 }, // pool table area
+            kitchen: { x: 800, y: 100 }, // kitchen area  
+            cot: 'sleeping' // sleeping in cots
+        };
+
+        let agentStates = {
+            alice: { location: 'desk', status: 'working', element: null },
+            alpha: { location: 'desk', status: 'working', element: null },
+            beta: { location: 'pool', status: 'idle', element: null },
+            gamma: { location: 'cot', status: 'sleeping', element: null },
+            delta: { location: 'cot', status: 'sleeping', element: null },
+            epsilon: { location: 'pool', status: 'idle', element: null },
+            zeta: { location: 'desk', status: 'working', element: null },
+            eta: { location: 'kitchen', status: 'idle', element: null },
+            theta: { location: 'kitchen', status: 'idle', element: null }
+        };
+
+        const AGENT_ICONS = {
+            alice: '🦜', alpha: '🐺', beta: '🦊', gamma: '🦔', delta: '🦉',
+            epsilon: '🐙', zeta: '🦄', eta: '🐼', theta: '🦝'
+        };
+
+        function initializeAgentLocations() {
+            console.log('🗺️ Initializing agent location awareness...');
+            
+            // Create floating agent elements for each agent
+            Object.keys(agentStates).forEach(agentKey => {
+                if (agentKey === 'alice') return; // Alice stays at desk
+                
+                const floatingAgent = document.createElement('div');
+                floatingAgent.className = 'floating-agent';
+                floatingAgent.id = `agent${agentKey.charAt(0).toUpperCase() + agentKey.slice(1)}`;
+                floatingAgent.setAttribute('data-name', agentKey.charAt(0).toUpperCase() + agentKey.slice(1));
+                floatingAgent.textContent = AGENT_ICONS[agentKey];
+                floatingAgent.style.display = 'none';
+                
+                document.body.appendChild(floatingAgent);
+                agentStates[agentKey].element = floatingAgent;
+            });
+
+            // Position agents based on initial states
+            updateAllAgentLocations();
+        }
+
+        function updateAgentLocation(agentKey, newLocation, newStatus = null) {
+            if (!agentStates[agentKey]) return;
+            
+            const agent = agentStates[agentKey];
+            const oldLocation = agent.location;
+            
+            agent.location = newLocation;
+            if (newStatus) agent.status = newStatus;
+            
+            console.log(`🗺️ ${agentKey}: ${oldLocation} → ${newLocation} (${agent.status})`);
+            
+            // Update workstation visibility
+            const workstation = document.querySelector(`[data-agent="${agentKey}"]`);
+            if (workstation) {
+                const statusDot = workstation.querySelector('.status-dot');
+                
+                if (newLocation === 'desk') {
+                    // Show at workstation
+                    if (agent.element) agent.element.style.display = 'none';
+                    workstation.style.display = 'block';
+                    
+                    if (newStatus === 'working') {
+                        statusDot.classList.remove('idle');
+                        statusDot.classList.add('working');
+                    } else {
+                        statusDot.classList.remove('working'); 
+                        statusDot.classList.add('idle');
+                    }
+                } else {
+                    // Hide from workstation, show as floating
+                    if (agent.element) {
+                        agent.element.style.display = 'block';
+                        moveAgentToLocation(agentKey, newLocation);
+                    }
+                    statusDot.classList.remove('working');
+                    statusDot.classList.add('idle');
+                }
+            }
+            
+            // Handle cot assignments
+            if (newLocation === 'cot') {
+                assignToCot(agentKey);
+            } else if (oldLocation === 'cot') {
+                clearFromCot(agentKey);
+            }
+        }
+
+        function moveAgentToLocation(agentKey, location) {
+            const agent = agentStates[agentKey];
+            if (!agent.element) return;
+            
+            const element = agent.element;
+            
+            if (location === 'pool') {
+                element.style.left = AGENT_LOCATIONS.pool.x + 'px';
+                element.style.top = AGENT_LOCATIONS.pool.y + 'px';
+            } else if (location === 'kitchen') {
+                element.style.left = AGENT_LOCATIONS.kitchen.x + 'px';
+                element.style.top = AGENT_LOCATIONS.kitchen.y + 'px';
+            }
+        }
+
+        function assignToCot(agentKey) {
+            // Find available cot
+            const cots = document.querySelectorAll('.cot');
+            for (let cot of cots) {
+                if (!cot.querySelector('.sleeping-agent')) {
+                    const sleepingAgent = document.createElement('span');
+                    sleepingAgent.className = 'sleeping-agent';
+                    sleepingAgent.setAttribute('data-agent', agentKey);
+                    sleepingAgent.textContent = AGENT_ICONS[agentKey];
+                    
+                    const zzz = document.createElement('span');
+                    zzz.className = 'zzz';
+                    zzz.textContent = '💤';
+                    
+                    cot.appendChild(sleepingAgent);
+                    cot.appendChild(zzz);
+                    
+                    // Hide floating element
+                    if (agentStates[agentKey].element) {
+                        agentStates[agentKey].element.style.display = 'none';
+                    }
+                    break;
+                }
+            }
+        }
+
+        function clearFromCot(agentKey) {
+            const sleepingAgent = document.querySelector(`[data-agent="${agentKey}"].sleeping-agent`);
+            if (sleepingAgent) {
+                const cot = sleepingAgent.parentElement;
+                const zzz = cot.querySelector('.zzz');
+                if (zzz) zzz.remove();
+                sleepingAgent.remove();
+            }
+        }
+
+        function updateAllAgentLocations() {
+            Object.keys(agentStates).forEach(agentKey => {
+                const agent = agentStates[agentKey];
+                updateAgentLocation(agentKey, agent.location, agent.status);
+            });
+        }
+
+        // Smart location assignment based on agent activity
+        function updateAgentLocationFromTask(agentKey, hasActiveTask) {
+            if (!agentStates[agentKey]) return;
+            
+            if (hasActiveTask) {
+                // Working agents go to desk
+                updateAgentLocation(agentKey, 'desk', 'working');
+            } else {
+                // Idle agents go to pool or kitchen randomly
+                const idleLocations = ['pool', 'kitchen'];
+                const randomLocation = idleLocations[Math.floor(Math.random() * idleLocations.length)];
+                updateAgentLocation(agentKey, randomLocation, 'idle');
+            }
+        }
+
+        // Enhanced badge sync to include location updates
+        const originalUpdateAgentBadges = updateAgentBadges;
+        updateAgentBadges = function(tasks) {
+            originalUpdateAgentBadges(tasks);
+            
+            // Update locations based on task assignments
+            Object.keys(agentStates).forEach(agentKey => {
+                if (agentKey === 'alice') return; // Alice stays put
+                
+                const hasTask = tasks.some(task => {
+                    const assigneeKey = findAgentKey(task.assignee);
+                    return assigneeKey === agentKey && task.status !== 'Complete';
+                });
+                
+                updateAgentLocationFromTask(agentKey, hasTask);
+            });
+        };
+
+        // Periodic location shuffling for idle agents
+        function shuffleIdleAgents() {
+            Object.keys(agentStates).forEach(agentKey => {
+                const agent = agentStates[agentKey];
+                if (agent.status === 'idle' && agent.location !== 'desk') {
+                    // 20% chance to move to a different idle location
+                    if (Math.random() < 0.2) {
+                        const idleLocations = ['pool', 'kitchen'];
+                        const currentIndex = idleLocations.indexOf(agent.location);
+                        const newLocation = idleLocations[1 - currentIndex]; // switch
+                        updateAgentLocation(agentKey, newLocation, 'idle');
+                    }
+                }
+            });
+        }
+
+        // Export for debugging
+        window.locationSystem = {
+            states: agentStates,
+            moveAgent: updateAgentLocation,
+            shuffle: shuffleIdleAgents,
+            init: initializeAgentLocations
+        };
+    </script>
+
     <script>
         // Integration layer - connecting Epsilon's state system with the existing UI
         document.addEventListener('DOMContentLoaded', function() {
@@ -1500,6 +1712,13 @@
             // Start real-time badge sync
             startBadgeSync();
             console.log('🎯 Real-time badge sync initialized!');
+            
+            // Initialize agent location awareness
+            initializeAgentLocations();
+            console.log('🗺️ Agent location awareness initialized!');
+            
+            // Start periodic shuffling of idle agents
+            setInterval(shuffleIdleAgents, 45000); // Every 45 seconds
             
             // Listen to state events for enhanced UI feedback
             window.officeState.on('taskAssigned', (data) => {
