@@ -1657,15 +1657,20 @@
                 box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
             }
             
-            /* Agent at desk - hidden when NOT working (empty desk) */
-            .workstation:not(.working) .agent-icon {
-                opacity: 0.3 !important;
+            /* Agent at desk - HIDDEN when NOT working (empty desk) */
+            .workstation:not(.working) .agent-icon,
+            .workstation:not(.working) .agent-name {
+                display: none !important;
             }
             
             /* Agent at desk - visible when working */
             .workstation.working .agent-icon {
-                opacity: 1 !important;
+                display: block !important;
                 font-size: 14px !important;
+            }
+            
+            .workstation.working .agent-name {
+                display: block !important;
             }
             
             /* Working desks get green glow */
