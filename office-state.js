@@ -19,6 +19,7 @@ class OfficeStateManager {
         this.eventListeners = new Map();
         this.animationQueue = [];
         this.isProcessingAnimations = false;
+        this.agentPersonalities = this.initializePersonalities();
         
         // Location coordinates for agent movement
         this.locations = {
@@ -44,6 +45,9 @@ class OfficeStateManager {
         this.loadState();
         this.bindEvents();
         this.syncUIWithState();
+        
+        // Start personality-based idle animations
+        this.startIdleAnimationLoops();
         
         console.log('🐙 Epsilon State Manager initialized - All tentacles deployed!');
     }
@@ -95,6 +99,97 @@ class OfficeStateManager {
                 activeAnimations: 0,
                 totalTasksCompleted: 1,
                 agentsActive: 3
+            }
+        };
+    }
+    
+    /**
+     * Initialize personality configurations for each agent
+     */
+    initializePersonalities() {
+        return {
+            alice: {
+                traits: ['cheerful', 'organized', 'tidy'],
+                description: 'Cheerful, organized, tidies desk',
+                animationSpeed: 1.0, // normal speed
+                idleAnimations: ['tidy-desk', 'organize-papers', 'smile-wave'],
+                workStyle: 'methodical',
+                speechPatterns: ['Great! Let me organize this task...', 'Everything in its place!', 'Perfect! ✨'],
+                favoriteActivities: ['desk-organizing', 'task-planning']
+            },
+            alpha: {
+                traits: ['competitive', 'fast', 'rushing'],
+                description: 'Competitive, fast, rushes to tasks',
+                animationSpeed: 1.5, // 50% faster
+                idleAnimations: ['pace-around', 'quick-stretches', 'impatient-tap'],
+                workStyle: 'sprint',
+                speechPatterns: ['Let\'s go! Time to move!', 'I\'ll get this done first!', 'Speed is key! 🏃‍♂️'],
+                favoriteActivities: ['pool-table', 'racing-tasks']
+            },
+            beta: {
+                traits: ['skeptical', 'analytical', 'rubber-duck-debugging'],
+                description: 'Skeptical, talks to rubber duck',
+                animationSpeed: 0.8, // 20% slower, more deliberate
+                idleAnimations: ['talk-to-duck', 'suspicious-glance', 'analyze-code'],
+                workStyle: 'analytical',
+                speechPatterns: ['Hmm, this seems suspicious...', 'Let me debug this properly...', 'Rubber duck, what do you think? 🦆'],
+                favoriteActivities: ['debugging', 'code-review']
+            },
+            gamma: {
+                traits: ['cautious', 'methodical', 'validator'],
+                description: 'Cautious, methodical, validates',
+                animationSpeed: 0.7, // slower and careful
+                idleAnimations: ['check-twice', 'validate-work', 'careful-review'],
+                workStyle: 'validator',
+                speechPatterns: ['Let me double-check this...', 'Better safe than sorry!', 'Validation complete! ✅'],
+                favoriteActivities: ['quality-assurance', 'testing']
+            },
+            delta: {
+                traits: ['wise', 'nocturnal', 'night-owl'],
+                description: 'Wise, nocturnal, most active at night',
+                animationSpeed: 0.6, // very slow and deliberate during day
+                idleAnimations: ['wise-nod', 'owl-look', 'night-stretch'],
+                workStyle: 'contemplative',
+                speechPatterns: ['Wisdom comes with patience...', 'The night brings clarity...', 'Hoot hoot, let me think... 🦉'],
+                favoriteActivities: ['night-work', 'mentoring'],
+                activeHours: [20, 21, 22, 23, 0, 1, 2, 3, 4, 5] // 8 PM to 5 AM
+            },
+            epsilon: {
+                traits: ['complex', 'multi-tasking', 'tentacular'],
+                description: 'Complex, manages multiple things',
+                animationSpeed: 1.2, // variable speed
+                idleAnimations: ['tentacle-organize', 'multi-task', 'complex-juggle'],
+                workStyle: 'parallel',
+                speechPatterns: ['Managing 8 things at once!', 'Complexity is my specialty!', 'All tentacles deployed! 🐙'],
+                favoriteActivities: ['multi-tasking', 'orchestration']
+            },
+            zeta: {
+                traits: ['creative', 'colorful', 'rainbow-magic'],
+                description: 'Creative, rainbow effects',
+                animationSpeed: 1.1, // slightly faster with flair
+                idleAnimations: ['rainbow-sparkle', 'creative-gesture', 'unicorn-prance'],
+                workStyle: 'artistic',
+                speechPatterns: ['Let\'s add some magic!', 'Rainbow time! 🌈', 'Creativity flowing! ✨'],
+                favoriteActivities: ['creative-work', 'design']
+            },
+            eta: {
+                traits: ['chill', 'relaxed', 'snack-lover'],
+                description: 'Chill, takes snack breaks',
+                animationSpeed: 0.5, // very relaxed
+                idleAnimations: ['snack-break', 'lazy-stretch', 'chill-wave'],
+                workStyle: 'relaxed',
+                speechPatterns: ['Time for a snack break!', 'Let\'s keep it chill...', 'No rush, no worry! 🐼'],
+                favoriteActivities: ['snacking', 'relaxing'],
+                snackBreakChance: 0.3 // 30% chance of snack break during idle
+            },
+            theta: {
+                traits: ['curious', 'explorer', 'tester'],
+                description: 'Curious, tests everything',
+                animationSpeed: 1.3, // quick and darting
+                idleAnimations: ['investigate', 'poke-things', 'curious-sniff'],
+                workStyle: 'experimental',
+                speechPatterns: ['What happens if I...?', 'Let me test this!', 'Curiosity drives discovery! 🦝'],
+                favoriteActivities: ['testing', 'exploration']
             }
         };
     }
@@ -389,10 +484,151 @@ class OfficeStateManager {
         const floatingAgent = document.getElementById(`floating-${agentName}`);
         if (!floatingAgent) return;
         
+        // Get personality-based animation speed
+        const personality = this.agentPersonalities[agentName];
+        const baseAnimationTime = 1000;
+        const personalizedTime = Math.round(baseAnimationTime / personality.animationSpeed);
+        
+        // Add personality-based movement style
+        floatingAgent.style.transition = `all ${personalizedTime}ms ease-in-out`;
         floatingAgent.style.left = targetLocation.x + 'px';
         floatingAgent.style.top = targetLocation.y + 'px';
         
-        return new Promise(resolve => setTimeout(resolve, 1000));
+        // Add personality flair to movement
+        if (personality.traits.includes('fast') || personality.traits.includes('rushing')) {
+            floatingAgent.classList.add('rushing-movement');
+        } else if (personality.traits.includes('cautious') || personality.traits.includes('methodical')) {
+            floatingAgent.classList.add('careful-movement');
+        } else if (personality.traits.includes('chill') || personality.traits.includes('relaxed')) {
+            floatingAgent.classList.add('relaxed-movement');
+        }
+        
+        return new Promise(resolve => setTimeout(resolve, personalizedTime));
+    }
+    
+    /**
+     * Trigger personality-based idle animations for agents
+     */
+    triggerIdleAnimation(agentName) {
+        const agent = this.state.agents[agentName];
+        const personality = this.agentPersonalities[agentName];
+        
+        if (agent.state !== 'idle' && agent.state !== 'working') return;
+        
+        // Choose random idle animation based on personality
+        const animations = personality.idleAnimations;
+        const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+        
+        // Check for special conditions (like Delta's night preference)
+        if (agentName === 'delta' && personality.activeHours) {
+            const currentHour = new Date().getHours();
+            const isActiveTime = personality.activeHours.includes(currentHour);
+            if (!isActiveTime) {
+                // Delta is less active during day hours
+                if (Math.random() < 0.3) return; // 70% chance to skip animation during day
+            }
+        }
+        
+        // Check for Eta's snack break chance
+        if (agentName === 'eta' && personality.snackBreakChance) {
+            if (Math.random() < personality.snackBreakChance) {
+                randomAnimation = 'snack-break';
+            }
+        }
+        
+        this.executeIdleAnimation(agentName, randomAnimation, personality);
+    }
+    
+    /**
+     * Execute the specific idle animation
+     */
+    executeIdleAnimation(agentName, animationType, personality) {
+        const workstation = document.querySelector(`[data-agent="${agentName}"]`);
+        const floatingAgent = document.getElementById(`floating-${agentName}`);
+        const targetElement = floatingAgent || workstation;
+        
+        if (!targetElement) return;
+        
+        // Create animation bubble
+        const animationBubble = document.createElement('div');
+        animationBubble.className = 'idle-animation-bubble';
+        animationBubble.style.position = 'absolute';
+        animationBubble.style.zIndex = '1000';
+        animationBubble.style.pointerEvents = 'none';
+        
+        // Set animation content based on type and personality
+        const animationContent = this.getAnimationContent(animationType, personality);
+        animationBubble.innerHTML = animationContent;
+        
+        // Position the bubble
+        const rect = targetElement.getBoundingClientRect();
+        const container = document.querySelector('.office-container');
+        if (container) {
+            const containerRect = container.getBoundingClientRect();
+            animationBubble.style.left = (rect.left - containerRect.left) + 'px';
+            animationBubble.style.top = (rect.top - containerRect.top - 30) + 'px';
+            container.appendChild(animationBubble);
+        }
+        
+        // Animate and remove
+        const animationDuration = Math.round(2000 / personality.animationSpeed);
+        setTimeout(() => {
+            if (animationBubble.parentNode) {
+                animationBubble.remove();
+            }
+        }, animationDuration);
+        
+        console.log(`🎭 ${agentName} performing: ${animationType}`);
+    }
+    
+    /**
+     * Get animation content based on animation type and personality
+     */
+    getAnimationContent(animationType, personality) {
+        const animationMap = {
+            'tidy-desk': '🧹✨',
+            'organize-papers': '📄📋',
+            'smile-wave': '😊👋',
+            'pace-around': '🏃‍♂️💨',
+            'quick-stretches': '🤸‍♂️',
+            'impatient-tap': '⏰👆',
+            'talk-to-duck': '🦆💭',
+            'suspicious-glance': '🤨👁️',
+            'analyze-code': '🔍💻',
+            'check-twice': '✅✅',
+            'validate-work': '🔍✓',
+            'careful-review': '📋👀',
+            'wise-nod': '🦉💭',
+            'owl-look': '👁️🦉',
+            'night-stretch': '🌙💪',
+            'tentacle-organize': '🐙📚',
+            'multi-task': '🔄🎯',
+            'complex-juggle': '🤹‍♂️💫',
+            'rainbow-sparkle': '🌈✨',
+            'creative-gesture': '🎨🖌️',
+            'unicorn-prance': '🦄💖',
+            'snack-break': '🥨☕',
+            'lazy-stretch': '😌🤗',
+            'chill-wave': '🐼👋',
+            'investigate': '🔍🕵️',
+            'poke-things': '👆🤔',
+            'curious-sniff': '👃🦝'
+        };
+        
+        return animationMap[animationType] || '✨';
+    }
+    
+    /**
+     * Start personality-based idle animation loops for all agents
+     */
+    startIdleAnimationLoops() {
+        setInterval(() => {
+            Object.keys(this.state.agents).forEach(agentName => {
+                if (Math.random() < 0.3) { // 30% chance per agent per interval
+                    this.triggerIdleAnimation(agentName);
+                }
+            });
+        }, 5000); // Check every 5 seconds
     }
     
     /**
