@@ -1687,18 +1687,21 @@
                 color: #fff !important;
             }
             
-            /* Task badge above working agents */
+            /* Task badge - positioned to left of desk so it doesn't get cut off */
             .workstation .ticket-badge {
                 position: absolute !important;
-                top: -10px !important;
-                left: 50% !important;
-                transform: translateX(-50%) !important;
-                font-size: 5px !important;
+                top: 50% !important;
+                right: 100% !important;
+                left: auto !important;
+                transform: translateY(-50%) !important;
+                margin-right: 4px !important;
+                font-size: 6px !important;
                 background: #1976d2 !important;
                 color: white !important;
-                padding: 1px 3px !important;
-                border-radius: 2px !important;
+                padding: 2px 4px !important;
+                border-radius: 3px !important;
                 white-space: nowrap !important;
+                z-index: 100 !important;
             }
             
             .workstation .ticket-badge:empty {
