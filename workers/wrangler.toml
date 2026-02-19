@@ -1,0 +1,13 @@
+name = "office-notion-proxy"
+main = "src/index.js"
+compatibility_date = "2024-01-15"
+
+[env.production]
+name = "office-notion-proxy"
+
+[vars]
+NOTION_DATABASE_ID = "2fe419064d3081bc8155ee2719c1d365"
+
+[[env.production.bindings]]
+name = "NOTION_API_KEY"
+type = "secret_text"

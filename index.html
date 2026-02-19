@@ -23,12 +23,14 @@
         
         .office-container {
             position: relative;
-            width: 900px;
-            height: 600px;
+            width: clamp(320px, 90vw, 1440px);
+            height: clamp(240px, 50vw, 800px);
+            max-width: 1440px;
             background: linear-gradient(135deg, #f5f0e8 0%, #e8e0d5 100%);
-            border-radius: 12px;
+            border-radius: clamp(4px, 1vw, 12px);
             box-shadow: 0 20px 60px rgba(0,0,0,0.4);
             overflow: hidden;
+            container-type: inline-size;
         }
         
         /* Floor */
@@ -473,6 +475,63 @@
         .status-item .icon {
             font-size: 14px;
         }
+
+        /* Activity Feed Ticker */
+        .activity-ticker {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(90deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            overflow: hidden;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+        }
+
+        .ticker-content {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            white-space: nowrap;
+            animation: scroll 60s linear infinite;
+        }
+
+        .ticker-event {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .ticker-event:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .ticker-event .event-icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .ticker-event .event-time {
+            margin-left: 10px;
+            opacity: 0.8;
+            font-size: 12px;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .ticker-paused .ticker-content {
+            animation-play-state: paused;
+        }
         
         /* Cots */
         .cots-area {
@@ -805,6 +864,347 @@
             border-color: #adb5bd;
             color: #495057;
         }
+
+        /* Responsive Container Queries for Overlap Prevention */
+        @container (max-width: 480px) {
+            .workstation-row {
+                flex-wrap: wrap;
+                bottom: 5px;
+                left: 5px;
+                gap: 5px;
+                max-width: calc(100% - 10px);
+            }
+            
+            .workstation {
+                width: clamp(40px, 12vw, 50px);
+                height: clamp(30px, 9vw, 40px);
+                font-size: clamp(12px, 3vw, 16px);
+            }
+            
+            .pool-table {
+                width: clamp(120px, 30vw, 150px);
+                height: clamp(70px, 18vw, 85px);
+                top: 40%;
+                left: 50%;
+            }
+            
+            .couch {
+                width: clamp(80px, 25vw, 100px);
+                height: clamp(35px, 12vw, 45px);
+                bottom: 80px;
+                left: 15px;
+            }
+            
+            .bookshelf {
+                width: clamp(200px, 80vw, 400px);
+                height: clamp(80px, 20vw, 110px);
+                top: 20px;
+            }
+            
+            .portraits-gallery {
+                gap: 4px;
+                top: 3px;
+            }
+            
+            .portrait {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+        }
+
+        @container (min-width: 481px) and (max-width: 768px) {
+            .workstation-row {
+                bottom: 8px;
+                left: 15px;
+                gap: 8px;
+            }
+            
+            .workstation {
+                width: clamp(50px, 8vw, 55px);
+                height: clamp(38px, 6vw, 42px);
+            }
+            
+            .pool-table {
+                width: clamp(140px, 25vw, 160px);
+                height: clamp(80px, 15vw, 90px);
+                top: 45%;
+                left: 40%;
+            }
+            
+            .couch {
+                width: clamp(100px, 20vw, 110px);
+                height: clamp(40px, 8vw, 48px);
+                bottom: 100px;
+                left: 25px;
+            }
+            
+            .bookshelf {
+                width: clamp(350px, 70vw, 450px);
+                height: clamp(100px, 18vw, 120px);
+                top: 25px;
+            }
+        }
+
+        @container (min-width: 769px) and (max-width: 1024px) {
+            .pool-table {
+                width: clamp(160px, 20vw, 180px);
+                height: clamp(90px, 12vw, 100px);
+                top: 50%;
+                left: 35%;
+            }
+            
+            .workstation-row {
+                bottom: 10px;
+                left: 20px;
+                gap: 10px;
+            }
+        }
+
+        @container (min-width: 1025px) {
+            .office-container {
+                width: clamp(900px, 80vw, 1440px);
+                height: clamp(600px, 45vw, 900px);
+            }
+            
+            .pool-table {
+                width: 200px;
+                height: 110px;
+            }
+        }
+
+        /* Prevent overlaps with z-index management */
+        .workstation-row { z-index: 10; }
+        .pool-table { z-index: 5; }
+        .couch { z-index: 6; }
+        .armchair { z-index: 6; }
+        .portraits-gallery { z-index: 15; }
+        .bookshelf { z-index: 8; }
+
+        /* Time-of-day lighting system */
+        :root {
+            --ambient-light: rgba(255, 255, 255, 0);
+            --shadow-intensity: 0.4;
+            --wall-brightness: 1;
+            --floor-brightness: 1;
+        }
+
+        .office-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--ambient-light);
+            pointer-events: none;
+            transition: background 2s ease;
+            z-index: 100;
+        }
+
+        /* Lighting variations */
+        .lighting-morning {
+            --ambient-light: linear-gradient(45deg, rgba(255, 220, 150, 0.15), rgba(255, 235, 180, 0.1));
+            --wall-brightness: 1.1;
+            --floor-brightness: 1.05;
+        }
+
+        .lighting-afternoon {
+            --ambient-light: rgba(255, 255, 255, 0.02);
+            --wall-brightness: 1;
+            --floor-brightness: 1;
+        }
+
+        .lighting-evening {
+            --ambient-light: linear-gradient(135deg, rgba(255, 150, 50, 0.2), rgba(255, 100, 30, 0.15));
+            --wall-brightness: 0.9;
+            --floor-brightness: 0.85;
+        }
+
+        .lighting-night {
+            --ambient-light: linear-gradient(180deg, rgba(20, 20, 40, 0.6), rgba(10, 10, 30, 0.7));
+            --shadow-intensity: 0.8;
+            --wall-brightness: 0.3;
+            --floor-brightness: 0.25;
+        }
+
+        .wall {
+            filter: brightness(var(--wall-brightness));
+            transition: filter 2s ease;
+        }
+
+        .floor {
+            filter: brightness(var(--floor-brightness));
+            transition: filter 2s ease;
+        }
+
+        /* Soft lamp glow for night time */
+        .night-lamp {
+            position: absolute;
+            top: 60px;
+            right: 100px;
+            width: 30px;
+            height: 40px;
+            background: #fff8dc;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            opacity: 0;
+            transition: opacity 2s ease;
+            box-shadow: 0 0 30px rgba(255, 248, 220, 0.6);
+        }
+
+        .lighting-night .night-lamp {
+            opacity: 1;
+        }
+
+        /* Agent Popover */
+        .agent-popover {
+            position: fixed;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 280px;
+            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .agent-popover.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+        }
+
+        .popover-content {
+            color: white;
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .agent-emoji {
+            font-size: 32px;
+        }
+
+        .agent-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .agent-status {
+            margin-left: auto;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .agent-status.working {
+            background: #4caf50;
+            color: white;
+        }
+
+        .agent-status.idle {
+            background: #ff9800;
+            color: white;
+        }
+
+        .agent-status.offline {
+            background: #666;
+            color: #ccc;
+        }
+
+        .current-task {
+            margin-bottom: 16px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .current-task strong {
+            color: #64b5f6;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .task-info {
+            color: #e0e0e0;
+        }
+
+        .popover-actions {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 12px;
+        }
+
+        .notion-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #2196f3;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s ease;
+        }
+
+        .notion-link:hover {
+            background: #1976d2;
+        }
+
+        .notion-link::before {
+            content: '📝';
+        }
+
+        /* Sound Controls */
+        .sound-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .sound-toggle:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+
+        .sound-toggle.muted {
+            opacity: 0.5;
+        }
+
+        /* Hide sound effects when prefers-reduced-motion */
+        @media (prefers-reduced-motion: reduce) {
+            .sound-toggle {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -843,6 +1243,14 @@
         <!-- Kitchen -->
         <div class="kitchen"></div>
         
+        <!-- Night Lamp -->
+        <div class="night-lamp"></div>
+        
+        <!-- Sound Controls -->
+        <div class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="Toggle Sound Effects">
+            🔊
+        </div>
+        
         <!-- Pool Table -->
         <div class="pool-table">
             <div class="pool-balls">🎱</div>
@@ -850,10 +1258,6 @@
         
         <!-- Couch -->
         <div class="couch"></div>
-        
-        <!-- Armchairs -->
-        <div class="armchair" style="bottom: 200px; left: 180px;"></div>
-        <div class="armchair" style="bottom: 200px; left: 240px;"></div>
         
         <!-- Birdcage -->
         <div class="birdcage"></div>
@@ -971,6 +1375,24 @@
             <div class="status-item"><span class="icon">🦜</span> Alice — Working</div>
             <div class="status-item"><span class="icon">🐺</span> Alpha — Idle</div>
             <div class="status-item"><span class="icon">🦊</span> Beta — Off</div>
+        </div>
+    </div>
+    
+    <!-- Agent Popover -->
+    <div class="agent-popover" id="agentPopover">
+        <div class="popover-content">
+            <div class="agent-header">
+                <span class="agent-emoji"></span>
+                <h3 class="agent-name"></h3>
+                <div class="agent-status"></div>
+            </div>
+            <div class="current-task">
+                <strong>Current Task:</strong>
+                <span class="task-info"></span>
+            </div>
+            <div class="popover-actions">
+                <a href="#" class="notion-link" target="_blank">View Tasks in Notion</a>
+            </div>
         </div>
     </div>
     
@@ -1130,8 +1552,265 @@
             }
         }
         
+        // Time-of-day lighting system
+        function updateLighting() {
+            const now = new Date();
+            const hour = now.getHours();
+            const container = document.querySelector('.office-container');
+            
+            // Remove existing lighting classes
+            container.classList.remove('lighting-morning', 'lighting-afternoon', 'lighting-evening', 'lighting-night');
+            
+            // Apply appropriate lighting based on time
+            if (hour >= 6 && hour < 12) {
+                // Morning: warm bright light
+                container.classList.add('lighting-morning');
+            } else if (hour >= 12 && hour < 18) {
+                // Afternoon: neutral
+                container.classList.add('lighting-afternoon');
+            } else if (hour >= 18 && hour < 22) {
+                // Evening: orange/sunset tint
+                container.classList.add('lighting-evening');
+            } else {
+                // Night: dark with soft lamp glow
+                container.classList.add('lighting-night');
+            }
+        }
+        
+        // Sound effects system using Web Audio API
+        class SoundSystem {
+            constructor() {
+                this.audioContext = null;
+                this.isMuted = localStorage.getItem('soundMuted') === 'true';
+                this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                this.initAudioContext();
+                this.updateToggleIcon();
+            }
+            
+            initAudioContext() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn('Web Audio API not supported');
+                }
+            }
+            
+            async resumeAudioContext() {
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    await this.audioContext.resume();
+                }
+            }
+            
+            createTone(frequency, duration, type = 'sine', volume = 0.1) {
+                if (!this.audioContext || this.isMuted || this.prefersReducedMotion) return;
+                
+                this.resumeAudioContext();
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                oscillator.type = type;
+                
+                // Envelope for smooth sound
+                gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + duration);
+            }
+            
+            playTaskComplete() {
+                // Pleasant chime - ascending arpeggio
+                const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5
+                frequencies.forEach((freq, index) => {
+                    setTimeout(() => {
+                        this.createTone(freq, 0.3, 'sine', 0.08);
+                    }, index * 150);
+                });
+            }
+            
+            playTaskAssigned() {
+                // Soft ping - gentle notification
+                this.createTone(800, 0.2, 'sine', 0.06);
+                setTimeout(() => {
+                    this.createTone(1000, 0.2, 'sine', 0.04);
+                }, 100);
+            }
+            
+            toggle() {
+                this.isMuted = !this.isMuted;
+                localStorage.setItem('soundMuted', this.isMuted.toString());
+                this.updateToggleIcon();
+                
+                // Play a test sound when unmuting
+                if (!this.isMuted && !this.prefersReducedMotion) {
+                    setTimeout(() => this.playTaskAssigned(), 100);
+                }
+            }
+            
+            updateToggleIcon() {
+                const toggle = document.getElementById('soundToggle');
+                if (toggle) {
+                    toggle.textContent = this.isMuted ? '🔇' : '🔊';
+                    toggle.classList.toggle('muted', this.isMuted);
+                }
+            }
+        }
+        
+        // Initialize sound system
+        const soundSystem = new SoundSystem();
+        
+        // Global functions for sound control
+        function toggleSound() {
+            soundSystem.toggle();
+        }
+        
+        function playTaskCompleteSound() {
+            soundSystem.playTaskComplete();
+        }
+        
+        function playTaskAssignedSound() {
+            soundSystem.playTaskAssigned();
+        }
+
+        // Agent popover system
+        const agentData = {
+            'alice': {
+                name: 'Alice',
+                emoji: '🦜',
+                status: 'working',
+                currentTask: 'Building Office Canvas Interface',
+                taskId: 'OFFICE-1-1'
+            },
+            'alpha': {
+                name: 'Alpha',
+                emoji: '🐺',
+                status: 'working',
+                currentTask: 'Sprite System Implementation',
+                taskId: 'OFFICE-1-2'
+            },
+            'beta': {
+                name: 'Beta',
+                emoji: '🦊',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            },
+            'gamma': {
+                name: 'Gamma',
+                emoji: '🦔',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            },
+            'delta': {
+                name: 'Delta',
+                emoji: '🦉',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            },
+            'epsilon': {
+                name: 'Epsilon',
+                emoji: '🐙',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            },
+            'zeta': {
+                name: 'Zeta',
+                emoji: '🦄',
+                status: 'working',
+                currentTask: 'Testing Infrastructure',
+                taskId: 'OFFICE-1-3'
+            },
+            'eta': {
+                name: 'Eta',
+                emoji: '🐼',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            },
+            'theta': {
+                name: 'Theta',
+                emoji: '🦝',
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
+            }
+        };
+
+        function showAgentPopover(agentId, event) {
+            event.stopPropagation();
+            const popover = document.getElementById('agentPopover');
+            const agent = agentData[agentId];
+            
+            if (!agent) return;
+            
+            // Update popover content
+            popover.querySelector('.agent-emoji').textContent = agent.emoji;
+            popover.querySelector('.agent-name').textContent = agent.name;
+            popover.querySelector('.task-info').textContent = agent.currentTask;
+            
+            const statusEl = popover.querySelector('.agent-status');
+            statusEl.textContent = agent.status;
+            statusEl.className = 'agent-status ' + agent.status;
+            
+            // Update Notion link
+            const notionLink = popover.querySelector('.notion-link');
+            if (agent.taskId && taskNotionPageIds[agent.taskId]) {
+                notionLink.href = `https://notion.so/${taskNotionPageIds[agent.taskId]}`;
+                notionLink.style.display = 'inline-flex';
+            } else {
+                notionLink.style.display = 'none';
+            }
+            
+            // Position popover near the workstation
+            const rect = event.target.closest('.workstation').getBoundingClientRect();
+            popover.style.left = (rect.left + rect.width / 2 - 150) + 'px';
+            popover.style.top = (rect.top - 220) + 'px';
+            
+            // Show popover
+            popover.classList.add('show');
+            
+            // Play a subtle interaction sound
+            setTimeout(() => {
+                soundSystem.createTone(600, 0.1, 'sine', 0.03);
+            }, 50);
+        }
+
+        function hideAgentPopover() {
+            document.getElementById('agentPopover').classList.remove('show');
+        }
+
+        // Add click handlers to workstations
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.workstation').forEach(workstation => {
+                workstation.addEventListener('click', (e) => {
+                    const agentId = workstation.getAttribute('data-agent');
+                    showAgentPopover(agentId, e);
+                });
+            });
+            
+            // Hide popover when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.agent-popover') && !e.target.closest('.workstation')) {
+                    hideAgentPopover();
+                }
+            });
+        });
+
         // Initialize
         generateBooks();
+        updateLighting();
+        
+        // Update lighting every 10 minutes
+        setInterval(updateLighting, 600000);
         
         // Demo: move Alpha around occasionally - DISABLED to prevent state conflicts
         // setInterval(() => {
@@ -1287,7 +1966,17 @@
                 // Update task data
                 const task = tasks.find(t => t.id === taskId);
                 if (task) {
+                    const oldColumn = task.column;
                     task.column = newColumn;
+                    
+                    // Play sound effects based on column change
+                    if (newColumn === 'done' && oldColumn !== 'done') {
+                        // Task completed - pleasant chime
+                        setTimeout(() => playTaskCompleteSound(), 100);
+                    } else if (oldColumn === 'backlog' && newColumn === 'progress') {
+                        // Task assigned - soft ping
+                        setTimeout(() => playTaskAssignedSound(), 100);
+                    }
                 }
                 
                 // Move element
@@ -1352,10 +2041,538 @@
     <script src="achievements-system.js"></script>
     <script src="achievement-enhancements.js"></script>
     
+    <!-- 🎯 REAL-TIME BADGE SYNC SYSTEM -->
+    <script>
+        // Real-time badge sync from Cloudflare Worker
+        const WORKER_ENDPOINT = 'https://office-notion-proxy.your-worker-domain.workers.dev/api/tasks';
+        const AGENT_NAME_MAP = {
+            'alice': ['Alice', 'alice', 'ALICE'],
+            'alpha': ['Alpha', 'Worker-Alpha', 'ALPHA', 'alpha'],
+            'beta': ['Beta', 'Worker-Beta', 'BETA', 'beta'], 
+            'gamma': ['Gamma', 'Worker-Gamma', 'GAMMA', 'gamma'],
+            'delta': ['Delta', 'Worker-Delta', 'DELTA', 'delta'],
+            'epsilon': ['Epsilon', 'Worker-Epsilon', 'EPSILON', 'epsilon'],
+            'zeta': ['Zeta', 'Worker-Zeta', 'ZETA', 'zeta'],
+            'eta': ['Eta', 'Worker-Eta', 'ETA', 'eta'],
+            'theta': ['Theta', 'Worker-Theta', 'THETA', 'theta']
+        };
+
+        let lastSyncTime = null;
+        let currentTasks = [];
+
+        async function syncBadgesFromWorker() {
+            try {
+                console.log('🔄 Syncing badges from Cloudflare Worker...');
+                
+                const response = await fetch(WORKER_ENDPOINT);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Worker returned error');
+                }
+
+                currentTasks = data.tasks;
+                lastSyncTime = new Date().toISOString();
+                
+                updateAgentBadges(data.tasks);
+                console.log(`✅ Synced ${data.tasks.length} tasks from Mission Control`);
+                
+            } catch (error) {
+                console.error('❌ Badge sync failed:', error);
+                // Fallback to demo data if worker unavailable
+                useDemoData();
+            }
+        }
+
+        function updateAgentBadges(tasks) {
+            // Clear all existing badges first
+            document.querySelectorAll('.workstation').forEach(workstation => {
+                const badge = workstation.querySelector('.ticket-badge');
+                const statusDot = workstation.querySelector('.status-dot');
+                
+                badge.textContent = '';
+                badge.style.display = 'none';
+                workstation.classList.remove('working');
+                statusDot.classList.remove('working');
+            });
+
+            // Update badges with active tasks
+            tasks.forEach(task => {
+                if (!task.assignee || task.status === 'Complete') return;
+
+                const agentKey = findAgentKey(task.assignee);
+                if (agentKey) {
+                    const workstation = document.querySelector(`[data-agent="${agentKey}"]`);
+                    if (workstation) {
+                        const badge = workstation.querySelector('.ticket-badge');
+                        const statusDot = workstation.querySelector('.status-dot');
+                        
+                        badge.textContent = task.taskId;
+                        badge.style.display = 'block';
+                        badge.onclick = (e) => openNotionTask(badge, e, task.url);
+                        
+                        // Update working status based on task status
+                        if (task.status === 'In Progress') {
+                            workstation.classList.add('working');
+                            statusDot.classList.add('working');
+                        }
+                    }
+                }
+            });
+        }
+
+        function findAgentKey(assigneeName) {
+            for (const [key, variants] of Object.entries(AGENT_NAME_MAP)) {
+                if (variants.some(variant => 
+                    assigneeName.toLowerCase().includes(variant.toLowerCase()) ||
+                    variant.toLowerCase().includes(assigneeName.toLowerCase())
+                )) {
+                    return key;
+                }
+            }
+            return null;
+        }
+
+        function useDemoData() {
+            console.log('🎭 Using demo data (Worker unavailable)');
+            updateAgentBadges([
+                { taskId: 'OFFICE-1-1', assignee: 'Alice', status: 'In Progress', url: 'https://notion.so/demo' },
+                { taskId: 'OFFICE-1-2', assignee: 'Worker-Alpha', status: 'In Progress', url: 'https://notion.so/demo' },
+                { taskId: 'OFFICE-1-4', assignee: 'Zeta', status: 'In Progress', url: 'https://notion.so/demo' }
+            ]);
+        }
+
+        // Enhanced openNotionTask with URL support
+        function openNotionTask(element, event, taskUrl = null) {
+            event.stopPropagation();
+            
+            const taskId = element.textContent.trim();
+            if (!taskId) return;
+
+            // Use provided URL or fallback to existing logic
+            if (taskUrl) {
+                window.open(taskUrl, '_blank');
+                return;
+            }
+
+            // Existing fallback logic
+            const pageId = taskNotionPageIds[taskId];
+            let notionUrl;
+            if (pageId) {
+                notionUrl = `https://www.notion.so/${pageId}`;
+            } else {
+                // Generic Mission Control board URL
+                notionUrl = `https://www.notion.so/2fe419064d3081bc8155ee2719c1d365`;
+            }
+            
+            window.open(notionUrl, '_blank');
+        }
+
+        // Auto-sync every 30 seconds
+        function startBadgeSync() {
+            syncBadgesFromWorker(); // Initial sync
+            setInterval(syncBadgesFromWorker, 30000);
+        }
+
+        // Export for debugging
+        window.badgeSync = {
+            sync: syncBadgesFromWorker,
+            tasks: () => currentTasks,
+            lastSync: () => lastSyncTime
+        };
+    </script>
+
+    <!-- 🗺️ AGENT LOCATION AWARENESS SYSTEM -->
+    <script>
+        // Agent location states and positions
+        const AGENT_LOCATIONS = {
+            desk: 'workstation', // agents at their workstations
+            pool: { x: 400, y: 280 }, // pool table area
+            kitchen: { x: 800, y: 100 }, // kitchen area  
+            cot: 'sleeping' // sleeping in cots
+        };
+
+        let agentStates = {
+            alice: { location: 'desk', status: 'working', element: null },
+            alpha: { location: 'desk', status: 'working', element: null },
+            beta: { location: 'pool', status: 'idle', element: null },
+            gamma: { location: 'cot', status: 'sleeping', element: null },
+            delta: { location: 'cot', status: 'sleeping', element: null },
+            epsilon: { location: 'pool', status: 'idle', element: null },
+            zeta: { location: 'desk', status: 'working', element: null },
+            eta: { location: 'kitchen', status: 'idle', element: null },
+            theta: { location: 'kitchen', status: 'idle', element: null }
+        };
+
+        const AGENT_ICONS = {
+            alice: '🦜', alpha: '🐺', beta: '🦊', gamma: '🦔', delta: '🦉',
+            epsilon: '🐙', zeta: '🦄', eta: '🐼', theta: '🦝'
+        };
+
+        function initializeAgentLocations() {
+            console.log('🗺️ Initializing agent location awareness...');
+            
+            // Create floating agent elements for each agent
+            Object.keys(agentStates).forEach(agentKey => {
+                if (agentKey === 'alice') return; // Alice stays at desk
+                
+                const floatingAgent = document.createElement('div');
+                floatingAgent.className = 'floating-agent';
+                floatingAgent.id = `agent${agentKey.charAt(0).toUpperCase() + agentKey.slice(1)}`;
+                floatingAgent.setAttribute('data-name', agentKey.charAt(0).toUpperCase() + agentKey.slice(1));
+                floatingAgent.textContent = AGENT_ICONS[agentKey];
+                floatingAgent.style.display = 'none';
+                
+                document.body.appendChild(floatingAgent);
+                agentStates[agentKey].element = floatingAgent;
+            });
+
+            // Position agents based on initial states
+            updateAllAgentLocations();
+        }
+
+        function updateAgentLocation(agentKey, newLocation, newStatus = null) {
+            if (!agentStates[agentKey]) return;
+            
+            const agent = agentStates[agentKey];
+            const oldLocation = agent.location;
+            
+            agent.location = newLocation;
+            if (newStatus) agent.status = newStatus;
+            
+            console.log(`🗺️ ${agentKey}: ${oldLocation} → ${newLocation} (${agent.status})`);
+            
+            // Update workstation visibility
+            const workstation = document.querySelector(`[data-agent="${agentKey}"]`);
+            if (workstation) {
+                const statusDot = workstation.querySelector('.status-dot');
+                
+                if (newLocation === 'desk') {
+                    // Show at workstation
+                    if (agent.element) agent.element.style.display = 'none';
+                    workstation.style.display = 'block';
+                    
+                    if (newStatus === 'working') {
+                        statusDot.classList.remove('idle');
+                        statusDot.classList.add('working');
+                    } else {
+                        statusDot.classList.remove('working'); 
+                        statusDot.classList.add('idle');
+                    }
+                } else {
+                    // Hide from workstation, show as floating
+                    if (agent.element) {
+                        agent.element.style.display = 'block';
+                        moveAgentToLocation(agentKey, newLocation);
+                    }
+                    statusDot.classList.remove('working');
+                    statusDot.classList.add('idle');
+                }
+            }
+            
+            // Handle cot assignments
+            if (newLocation === 'cot') {
+                assignToCot(agentKey);
+            } else if (oldLocation === 'cot') {
+                clearFromCot(agentKey);
+            }
+        }
+
+        function moveAgentToLocation(agentKey, location) {
+            const agent = agentStates[agentKey];
+            if (!agent.element) return;
+            
+            const element = agent.element;
+            
+            if (location === 'pool') {
+                element.style.left = AGENT_LOCATIONS.pool.x + 'px';
+                element.style.top = AGENT_LOCATIONS.pool.y + 'px';
+            } else if (location === 'kitchen') {
+                element.style.left = AGENT_LOCATIONS.kitchen.x + 'px';
+                element.style.top = AGENT_LOCATIONS.kitchen.y + 'px';
+            }
+        }
+
+        function assignToCot(agentKey) {
+            // Find available cot
+            const cots = document.querySelectorAll('.cot');
+            for (let cot of cots) {
+                if (!cot.querySelector('.sleeping-agent')) {
+                    const sleepingAgent = document.createElement('span');
+                    sleepingAgent.className = 'sleeping-agent';
+                    sleepingAgent.setAttribute('data-agent', agentKey);
+                    sleepingAgent.textContent = AGENT_ICONS[agentKey];
+                    
+                    const zzz = document.createElement('span');
+                    zzz.className = 'zzz';
+                    zzz.textContent = '💤';
+                    
+                    cot.appendChild(sleepingAgent);
+                    cot.appendChild(zzz);
+                    
+                    // Hide floating element
+                    if (agentStates[agentKey].element) {
+                        agentStates[agentKey].element.style.display = 'none';
+                    }
+                    break;
+                }
+            }
+        }
+
+        function clearFromCot(agentKey) {
+            const sleepingAgent = document.querySelector(`[data-agent="${agentKey}"].sleeping-agent`);
+            if (sleepingAgent) {
+                const cot = sleepingAgent.parentElement;
+                const zzz = cot.querySelector('.zzz');
+                if (zzz) zzz.remove();
+                sleepingAgent.remove();
+            }
+        }
+
+        function updateAllAgentLocations() {
+            Object.keys(agentStates).forEach(agentKey => {
+                const agent = agentStates[agentKey];
+                updateAgentLocation(agentKey, agent.location, agent.status);
+            });
+        }
+
+        // Smart location assignment based on agent activity
+        function updateAgentLocationFromTask(agentKey, hasActiveTask) {
+            if (!agentStates[agentKey]) return;
+            
+            if (hasActiveTask) {
+                // Working agents go to desk
+                updateAgentLocation(agentKey, 'desk', 'working');
+            } else {
+                // Idle agents go to pool or kitchen randomly
+                const idleLocations = ['pool', 'kitchen'];
+                const randomLocation = idleLocations[Math.floor(Math.random() * idleLocations.length)];
+                updateAgentLocation(agentKey, randomLocation, 'idle');
+            }
+        }
+
+        // Enhanced badge sync to include location updates
+        const originalUpdateAgentBadges = updateAgentBadges;
+        updateAgentBadges = function(tasks) {
+            originalUpdateAgentBadges(tasks);
+            
+            // Update locations based on task assignments
+            Object.keys(agentStates).forEach(agentKey => {
+                if (agentKey === 'alice') return; // Alice stays put
+                
+                const hasTask = tasks.some(task => {
+                    const assigneeKey = findAgentKey(task.assignee);
+                    return assigneeKey === agentKey && task.status !== 'Complete';
+                });
+                
+                updateAgentLocationFromTask(agentKey, hasTask);
+            });
+        };
+
+        // Periodic location shuffling for idle agents
+        function shuffleIdleAgents() {
+            Object.keys(agentStates).forEach(agentKey => {
+                const agent = agentStates[agentKey];
+                if (agent.status === 'idle' && agent.location !== 'desk') {
+                    // 20% chance to move to a different idle location
+                    if (Math.random() < 0.2) {
+                        const idleLocations = ['pool', 'kitchen'];
+                        const currentIndex = idleLocations.indexOf(agent.location);
+                        const newLocation = idleLocations[1 - currentIndex]; // switch
+                        updateAgentLocation(agentKey, newLocation, 'idle');
+                    }
+                }
+            });
+        }
+
+        // Export for debugging
+        window.locationSystem = {
+            states: agentStates,
+            moveAgent: updateAgentLocation,
+            shuffle: shuffleIdleAgents,
+            init: initializeAgentLocations
+        };
+    </script>
+
+    <!-- 📰 ACTIVITY FEED TICKER SYSTEM -->
+    <script>
+        let activityEvents = [];
+        const MAX_EVENTS = 10;
+
+        function addActivityEvent(type, message, agentIcon = '', notionUrl = null) {
+            const event = {
+                id: Date.now() + Math.random(),
+                type: type, // 'claim', 'complete', 'assign', 'move'
+                message: message,
+                icon: getEventIcon(type),
+                agentIcon: agentIcon,
+                timestamp: new Date(),
+                notionUrl: notionUrl
+            };
+
+            activityEvents.unshift(event); // Add to front
+            
+            // Keep only latest MAX_EVENTS
+            if (activityEvents.length > MAX_EVENTS) {
+                activityEvents = activityEvents.slice(0, MAX_EVENTS);
+            }
+
+            updateTickerDisplay();
+            console.log(`📰 Activity: ${message}`);
+        }
+
+        function getEventIcon(type) {
+            const icons = {
+                claim: '🎯',
+                complete: '✅', 
+                assign: '📋',
+                move: '🚶',
+                sync: '🔄',
+                wake: '☕',
+                sleep: '💤'
+            };
+            return icons[type] || '📰';
+        }
+
+        function updateTickerDisplay() {
+            const tickerContent = document.getElementById('tickerContent');
+            if (!tickerContent) return;
+
+            tickerContent.innerHTML = activityEvents.map(event => {
+                const timeAgo = getTimeAgo(event.timestamp);
+                return `
+                    <div class="ticker-event" onclick="openEventUrl('${event.notionUrl || ''}', '${event.type}')">
+                        <span class="event-icon">${event.icon}</span>
+                        <span class="event-agent">${event.agentIcon}</span>
+                        <span class="event-message">${event.message}</span>
+                        <span class="event-time">${timeAgo}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const diffMs = now - timestamp;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+
+            if (diffMins < 1) return 'now';
+            if (diffMins < 60) return `${diffMins}m`;
+            if (diffHours < 24) return `${diffHours}h`;
+            return timestamp.toLocaleDateString();
+        }
+
+        function openEventUrl(notionUrl, eventType) {
+            if (notionUrl && notionUrl !== 'null' && notionUrl !== '') {
+                window.open(notionUrl, '_blank');
+            } else {
+                // Fallback to Mission Control board
+                window.open('https://www.notion.so/2fe419064d3081bc8155ee2719c1d365', '_blank');
+            }
+        }
+
+        // Hook into existing systems to generate activity
+        function initializeActivityFeed() {
+            console.log('📰 Initializing activity feed ticker...');
+
+            // Add initial demo events
+            addActivityEvent('sync', 'Office systems initialized', '🏢');
+            
+            setTimeout(() => {
+                addActivityEvent('wake', 'Alice started her shift', '🦜');
+            }, 2000);
+
+            setTimeout(() => {
+                addActivityEvent('claim', 'Worker-Alpha claimed OFFICE-FIX-1', '🐺');
+            }, 4000);
+        }
+
+        // Hook into badge sync to track task events
+        const originalSyncBadges = syncBadgesFromWorker;
+        syncBadgesFromWorker = async function() {
+            await originalSyncBadges();
+            
+            // Generate activity based on task changes
+            if (currentTasks && currentTasks.length > 0) {
+                const activeTasks = currentTasks.filter(task => 
+                    task.status === 'In Progress' || task.status === 'Not Started'
+                );
+                
+                // Check for newly assigned tasks (simple demo)
+                activeTasks.forEach(task => {
+                    if (task.assignee && Math.random() < 0.1) { // 10% chance to show activity
+                        const agentKey = findAgentKey(task.assignee);
+                        const agentIcon = agentKey ? AGENT_ICONS[agentKey] : '🤖';
+                        const action = task.status === 'In Progress' ? 'working on' : 'assigned to';
+                        
+                        addActivityEvent(
+                            task.status === 'In Progress' ? 'claim' : 'assign',
+                            `${task.assignee} ${action} ${task.taskId}`,
+                            agentIcon,
+                            task.url
+                        );
+                    }
+                });
+            }
+        };
+
+        // Hook into location system for movement events  
+        const originalUpdateAgentLocation = updateAgentLocation;
+        updateAgentLocation = function(agentKey, newLocation, newStatus) {
+            const oldLocation = agentStates[agentKey]?.location;
+            originalUpdateAgentLocation(agentKey, newLocation, newStatus);
+            
+            // Generate movement activity
+            if (oldLocation && oldLocation !== newLocation && Math.random() < 0.3) {
+                const agentIcon = AGENT_ICONS[agentKey];
+                const locationName = newLocation === 'desk' ? 'workstation' : newLocation;
+                addActivityEvent('move', `${agentKey} moved to ${locationName}`, agentIcon);
+            }
+        };
+
+        // Ticker controls
+        function pauseTicker() {
+            document.getElementById('activityTicker').classList.add('ticker-paused');
+        }
+
+        function resumeTicker() {
+            document.getElementById('activityTicker').classList.remove('ticker-paused');
+        }
+
+        // Export for debugging
+        window.activityFeed = {
+            events: () => activityEvents,
+            add: addActivityEvent,
+            pause: pauseTicker,
+            resume: resumeTicker,
+            init: initializeActivityFeed
+        };
+    </script>
+
+    
     <script>
         // Integration layer - connecting Epsilon's state system with the existing UI
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🐙 Office integrated with Epsilon State Management!');
+            
+            // Start real-time badge sync
+            startBadgeSync();
+            console.log('🎯 Real-time badge sync initialized!');
+            
+            // Initialize agent location awareness
+            initializeAgentLocations();
+            console.log('🗺️ Agent location awareness initialized!');
+            
+            // Start periodic shuffling of idle agents
+            setInterval(shuffleIdleAgents, 45000); // Every 45 seconds
+            
+            // Initialize activity feed ticker
+            initializeActivityFeed();
+            console.log('📰 Activity feed ticker initialized!');
             
             // Listen to state events for enhanced UI feedback
             window.officeState.on('taskAssigned', (data) => {
@@ -1439,5 +2656,12 @@
         console.log('  epsilon.sequenceDiagram() - View workflow diagram');
         console.log('  epsilon.tentacles - See my beautiful tentacles!');
     </script>
+
+    <!-- Activity Feed Ticker -->
+    <div class="activity-ticker" id="activityTicker">
+        <div class="ticker-content" id="tickerContent">
+            <!-- Activity events will be populated here -->
+        </div>
+    </div>
 </body>
 </html>
