@@ -57,6 +57,9 @@
             .cot,
             .trophy-case,
             .trophy-button,
+            .trophy-icon,
+            .trophy-panel,
+            #trophy-case,
             .sound-toggle,
             .mail-chute,
             .kitchen,
@@ -70,7 +73,8 @@
             .window,
             .floating-agent,
             .ticket-badge,
-            .agent-name {
+            .agent-name,
+            .night-lamp {
                 display: none !important;
             }
             
@@ -87,11 +91,11 @@
             
             /* Pool table - centered and rotated */
             .pool-table {
-                top: 40%;
-                left: 50%;
-                transform: translate(-50%, -50%) rotate(90deg);
-                width: 140px;
-                height: 80px;
+                top: 40% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) rotate(90deg) !important;
+                width: 140px !important;
+                height: 80px !important;
             }
             
             /* Birdcage - centered below pool table */
@@ -108,10 +112,9 @@
                 font-size: 28px;
             }
             
-            /* Plants - show in corners */
+            /* Plants - hide for cleaner look */
             .plant {
-                display: block;
-                font-size: 24px;
+                display: none !important;
             }
             
             /* Workstations - centered at bottom */
