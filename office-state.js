@@ -52,6 +52,15 @@ class OfficeStateManager {
             proximityThreshold: 80 // pixels for proximity detection
         };
         
+        // Office events system
+        this.officeEvents = {
+            lastEventTime: 0,
+            minEventInterval: 20 * 60 * 1000, // 20 minutes
+            maxEventInterval: 40 * 60 * 1000, // 40 minutes
+            activeEvents: new Set(),
+            eventTypes: ['coffee-run', 'water-cooler-chat', 'celebration']
+        };
+        
         this.loadState();
         this.bindEvents();
         this.syncUIWithState();
@@ -61,6 +70,9 @@ class OfficeStateManager {
         
         // Start agent interaction system
         this.startInteractionSystem();
+        
+        // Start office events system
+        this.startOfficeEventsSystem();
         
         console.log('🐙 Epsilon State Manager initialized - All tentacles deployed!');
     }
@@ -388,6 +400,10 @@ class OfficeStateManager {
         }, 5000);
         
         this.state.metadata.totalTasksCompleted++;
+        
+        // Trigger celebration event for task completion
+        this.onTaskCompleted(taskId, agentName);
+        
         this.emit('taskCompleted', { taskId, agentName, timestamp: Date.now() });
         this.saveState();
     }
@@ -906,6 +922,359 @@ class OfficeStateManager {
         setInterval(() => {
             this.checkAgentProximity();
         }, 3000); // Check every 3 seconds
+    }
+    
+    /**
+     * OFFICE EVENTS SYSTEM
+     */
+    
+    /**
+     * Check if it's time for a random office event
+     */
+    checkForOfficeEvents() {
+        const now = Date.now();
+        const timeSinceLastEvent = now - this.officeEvents.lastEventTime;
+        
+        if (timeSinceLastEvent < this.officeEvents.minEventInterval) {
+            return; // Too soon for next event
+        }
+        
+        // Calculate probability based on time elapsed
+        const maxWaitTime = this.officeEvents.maxEventInterval;
+        const probability = Math.min((timeSinceLastEvent - this.officeEvents.minEventInterval) / (maxWaitTime - this.officeEvents.minEventInterval), 1.0);
+        
+        if (Math.random() < probability * 0.1) { // Scale down probability for more realistic timing
+            this.triggerRandomOfficeEvent();
+        }
+    }
+    
+    /**
+     * Trigger a random office event
+     */
+    triggerRandomOfficeEvent() {
+        const availableEvents = this.officeEvents.eventTypes.filter(event => 
+            !this.officeEvents.activeEvents.has(event)
+        );
+        
+        if (availableEvents.length === 0) return;
+        
+        const eventType = availableEvents[Math.floor(Math.random() * availableEvents.length)];
+        this.officeEvents.lastEventTime = Date.now();
+        this.officeEvents.activeEvents.add(eventType);
+        
+        console.log(`🎉 Office event triggered: ${eventType}`);
+        
+        switch (eventType) {
+            case 'coffee-run':
+                this.triggerCoffeeRun();
+                break;
+            case 'water-cooler-chat':
+                this.triggerWaterCoolerChat();
+                break;
+            case 'celebration':
+                this.triggerCelebration();
+                break;
+        }
+    }
+    
+    /**
+     * Coffee run event: agent walks to kitchen and returns
+     */
+    async triggerCoffeeRun() {
+        // Select a random agent who isn't actively working on a critical task
+        const eligibleAgents = Object.entries(this.state.agents)
+            .filter(([name, agent]) => agent.state === 'working' || agent.state === 'idle')
+            .map(([name]) => name);
+            
+        if (eligibleAgents.length === 0) {
+            this.officeEvents.activeEvents.delete('coffee-run');
+            return;
+        }
+        
+        const selectedAgent = eligibleAgents[Math.floor(Math.random() * eligibleAgents.length)];
+        const agent = this.state.agents[selectedAgent];
+        const originalLocation = agent.location;
+        const originalState = agent.state;
+        
+        // Create coffee run announcement
+        this.createEventAnnouncement('☕ Coffee Run!', `${this.state.agents[selectedAgent].icon} ${selectedAgent} is getting coffee for everyone!`);
+        
+        try {
+            // Move agent to kitchen
+            agent.state = 'coffee-run';
+            agent.location = 'kitchen';
+            this.createFloatingAgent(selectedAgent);
+            await this.animateAgentMovement(selectedAgent, this.locations.kitchen);
+            
+            // Show coffee activity
+            this.createCoffeeActivity(selectedAgent);
+            
+            // Wait at kitchen
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            
+            // Return to original location
+            agent.location = originalLocation;
+            await this.animateAgentMovement(selectedAgent, this.locations[originalLocation]);
+            this.removeFloatingAgent(selectedAgent);
+            agent.state = originalState;
+            
+            // Update visuals
+            this.updateAgentVisuals(selectedAgent);
+            
+        } catch (error) {
+            console.error('Coffee run error:', error);
+        } finally {
+            this.officeEvents.activeEvents.delete('coffee-run');
+        }
+        
+        console.log(`☕ Coffee run completed by ${selectedAgent}`);
+    }
+    
+    /**
+     * Water cooler chat event: 2-3 agents gather briefly
+     */
+    async triggerWaterCoolerChat() {
+        // Select 2-3 random agents
+        const eligibleAgents = Object.entries(this.state.agents)
+            .filter(([name, agent]) => agent.state === 'working' || agent.state === 'idle')
+            .map(([name]) => name);
+            
+        if (eligibleAgents.length < 2) {
+            this.officeEvents.activeEvents.delete('water-cooler-chat');
+            return;
+        }
+        
+        const participantCount = Math.min(3, Math.max(2, Math.floor(Math.random() * 3) + 2));
+        const participants = eligibleAgents.slice(0, participantCount);
+        const originalStates = {};
+        const originalLocations = {};
+        
+        // Create water cooler chat announcement
+        const participantIcons = participants.map(name => this.state.agents[name].icon).join(' ');
+        this.createEventAnnouncement('💬 Water Cooler Chat', `${participantIcons} gathering for some office gossip!`);
+        
+        try {
+            // Move agents to water cooler
+            for (const agentName of participants) {
+                const agent = this.state.agents[agentName];
+                originalStates[agentName] = agent.state;
+                originalLocations[agentName] = agent.location;
+                
+                agent.state = 'chatting';
+                agent.location = 'water-cooler';
+                this.createFloatingAgent(agentName);
+                await this.animateAgentMovement(agentName, this.locations['water-cooler']);
+            }
+            
+            // Show chat activity
+            this.createWaterCoolerChatActivity(participants);
+            
+            // Chat duration
+            await new Promise(resolve => setTimeout(resolve, 8000));
+            
+            // Return agents to original locations
+            for (const agentName of participants) {
+                const agent = this.state.agents[agentName];
+                agent.location = originalLocations[agentName];
+                await this.animateAgentMovement(agentName, this.locations[originalLocations[agentName]]);
+                this.removeFloatingAgent(agentName);
+                agent.state = originalStates[agentName];
+                this.updateAgentVisuals(agentName);
+            }
+            
+        } catch (error) {
+            console.error('Water cooler chat error:', error);
+        } finally {
+            this.officeEvents.activeEvents.delete('water-cooler-chat');
+        }
+        
+        console.log(`💬 Water cooler chat completed with: ${participants.join(', ')}`);
+    }
+    
+    /**
+     * Celebration event: confetti when task completes
+     */
+    triggerCelebration(taskId = null, agentName = null) {
+        const celebrationId = `celebration-${Date.now()}`;
+        
+        // If no specific task completion, create a general celebration
+        if (!taskId && !agentName) {
+            const workingAgents = Object.entries(this.state.agents)
+                .filter(([name, agent]) => agent.state === 'working')
+                .map(([name]) => name);
+                
+            if (workingAgents.length > 0) {
+                agentName = workingAgents[Math.floor(Math.random() * workingAgents.length)];
+                taskId = this.state.agents[agentName].task || 'Mystery Task';
+            }
+        }
+        
+        if (!agentName) {
+            this.officeEvents.activeEvents.delete('celebration');
+            return;
+        }
+        
+        // Create celebration announcement
+        this.createEventAnnouncement('🎉 Celebration!', `${this.state.agents[agentName].icon} ${agentName} just completed ${taskId}!`);
+        
+        // Create confetti effect
+        this.createConfettiEffect(agentName);
+        
+        // Schedule cleanup
+        setTimeout(() => {
+            this.officeEvents.activeEvents.delete('celebration');
+            this.cleanupConfetti();
+        }, 6000);
+        
+        console.log(`🎉 Celebration for ${agentName} completing ${taskId}`);
+    }
+    
+    /**
+     * Create event announcement banner
+     */
+    createEventAnnouncement(title, message) {
+        const banner = document.createElement('div');
+        banner.className = 'event-announcement';
+        banner.style.position = 'fixed';
+        banner.style.top = '20px';
+        banner.style.left = '50%';
+        banner.style.transform = 'translateX(-50%)';
+        banner.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        banner.style.color = 'white';
+        banner.style.padding = '15px 25px';
+        banner.style.borderRadius = '25px';
+        banner.style.fontSize = '16px';
+        banner.style.fontWeight = 'bold';
+        banner.style.zIndex = '10000';
+        banner.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
+        banner.style.animation = 'slideInFromTop 0.5s ease-out';
+        banner.innerHTML = `<div style="font-size: 18px; margin-bottom: 5px;">${title}</div><div style="font-size: 14px; opacity: 0.9;">${message}</div>`;
+        
+        document.body.appendChild(banner);
+        
+        // Remove banner after delay
+        setTimeout(() => {
+            if (banner.parentNode) {
+                banner.style.animation = 'slideOutToTop 0.5s ease-in forwards';
+                setTimeout(() => banner.remove(), 500);
+            }
+        }, 4000);
+    }
+    
+    /**
+     * Create coffee activity visual
+     */
+    createCoffeeActivity(agentName) {
+        const kitchen = document.querySelector('.kitchen') || document.createElement('div');
+        const coffeeIcon = document.createElement('div');
+        coffeeIcon.className = 'coffee-activity';
+        coffeeIcon.style.position = 'absolute';
+        coffeeIcon.style.top = '-30px';
+        coffeeIcon.style.left = '50%';
+        coffeeIcon.style.transform = 'translateX(-50%)';
+        coffeeIcon.style.fontSize = '20px';
+        coffeeIcon.style.animation = 'bobbing 1s ease-in-out infinite';
+        coffeeIcon.innerHTML = '☕💨';
+        
+        const container = document.querySelector('.office-container');
+        if (container) {
+            coffeeIcon.style.position = 'absolute';
+            coffeeIcon.style.left = this.locations.kitchen.x + 'px';
+            coffeeIcon.style.top = (this.locations.kitchen.y - 30) + 'px';
+            container.appendChild(coffeeIcon);
+            
+            setTimeout(() => coffeeIcon.remove(), 5000);
+        }
+    }
+    
+    /**
+     * Create water cooler chat activity visual
+     */
+    createWaterCoolerChatActivity(participants) {
+        const chatBubbles = ['💬', '😄', '🗣️', '👥'];
+        
+        participants.forEach((agentName, index) => {
+            setTimeout(() => {
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-bubble';
+                bubble.style.position = 'absolute';
+                bubble.style.left = (this.locations['water-cooler'].x + (index * 20)) + 'px';
+                bubble.style.top = (this.locations['water-cooler'].y - 40) + 'px';
+                bubble.style.fontSize = '16px';
+                bubble.style.animation = 'float 1s ease-in-out infinite';
+                bubble.innerHTML = chatBubbles[index % chatBubbles.length];
+                
+                const container = document.querySelector('.office-container');
+                if (container) {
+                    container.appendChild(bubble);
+                    setTimeout(() => bubble.remove(), 6000);
+                }
+            }, index * 1000);
+        });
+    }
+    
+    /**
+     * Create confetti effect
+     */
+    createConfettiEffect(agentName) {
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7'];
+        const confettiCount = 20;
+        
+        for (let i = 0; i < confettiCount; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.position = 'absolute';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.borderRadius = '50%';
+                confetti.style.zIndex = '9999';
+                
+                // Position around the agent
+                const agentLocation = this.locations[this.state.agents[agentName].location];
+                if (agentLocation) {
+                    confetti.style.left = (agentLocation.x + (Math.random() - 0.5) * 100) + 'px';
+                    confetti.style.top = (agentLocation.y + (Math.random() - 0.5) * 100) + 'px';
+                    confetti.style.animation = `confettiFall ${2 + Math.random() * 2}s ease-out forwards`;
+                    
+                    const container = document.querySelector('.office-container');
+                    if (container) {
+                        container.appendChild(confetti);
+                        setTimeout(() => confetti.remove(), 4000);
+                    }
+                }
+            }, i * 100);
+        }
+    }
+    
+    /**
+     * Clean up confetti elements
+     */
+    cleanupConfetti() {
+        const confettiElements = document.querySelectorAll('.confetti');
+        confettiElements.forEach(confetti => confetti.remove());
+    }
+    
+    /**
+     * Start office events system
+     */
+    startOfficeEventsSystem() {
+        // Check for events every 2 minutes
+        setInterval(() => {
+            this.checkForOfficeEvents();
+        }, 2 * 60 * 1000);
+        
+        // Set initial last event time to now to prevent immediate event
+        this.officeEvents.lastEventTime = Date.now();
+    }
+    
+    /**
+     * Trigger celebration on task completion (integration hook)
+     */
+    onTaskCompleted(taskId, agentName) {
+        // Call existing task completion logic first
+        this.triggerCelebration(taskId, agentName);
     }
     
     /**
