@@ -1592,9 +1592,14 @@
                 flex-direction: column !important;
                 gap: 8px !important;
                 z-index: 999 !important;
+                border: 3px solid red !important;
+                min-width: 60px !important;
+                min-height: 150px !important;
+                background: rgba(255,0,0,0.1) !important;
             }
             
-            .workstation.working {
+            /* Force ALL workstations visible for debug */
+            .workstation {
                 display: flex !important;
                 visibility: visible !important;
                 opacity: 1 !important;
@@ -1606,14 +1611,15 @@
                 align-items: center !important;
                 justify-content: center !important;
                 position: relative !important;
+                border: 2px solid blue !important;
             }
             
-            .workstation.working .agent-icon {
+            .workstation .agent-icon {
                 font-size: 18px !important;
                 display: block !important;
             }
             
-            .workstation.working .ticket-badge {
+            .workstation .ticket-badge {
                 display: block !important;
                 position: absolute !important;
                 top: -12px !important;
