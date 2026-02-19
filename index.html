@@ -86,29 +86,32 @@
                 padding: 5px;
             }
             
-            /* Birdcage - on wall in the back */
+            /* Birdcage - hanging on wall */
             .birdcage {
-                top: 18%;
-                bottom: auto;
-                right: 10%;
-                left: auto;
-                transform: none;
-                width: 40px;
-                height: 55px;
+                top: 16% !important;
+                bottom: auto !important;
+                right: 8% !important;
+                left: auto !important;
+                transform: none !important;
+                width: 35px !important;
+                height: 50px !important;
+                z-index: 10;
             }
             
             .birdcage::after {
-                font-size: 22px;
+                font-size: 20px !important;
             }
             
             /* Pool table - centered and rotated */
             .pool-table {
                 display: block !important;
-                top: 42% !important;
+                position: absolute !important;
+                top: 38% !important;
                 left: 50% !important;
                 transform: translate(-50%, -50%) rotate(90deg) !important;
-                width: 120px !important;
-                height: 70px !important;
+                width: 100px !important;
+                height: 60px !important;
+                z-index: 5;
             }
             
             .pool-balls {
@@ -117,41 +120,41 @@
             
             /* === DESKS AREA (working agents) === */
             .workstation-row {
-                position: absolute;
-                bottom: 25%;
-                left: 50%;
-                transform: translateX(-50%);
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-                justify-content: center;
-                max-width: 95%;
+                position: absolute !important;
+                bottom: 18% !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                gap: 10px !important;
+                justify-content: center !important;
             }
             
             .workstation {
-                width: 52px;
-                height: 48px;
-                background: #a1887f;
-                border-radius: 4px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: flex-end;
-                padding-bottom: 4px;
-                position: relative;
-                box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+                width: 55px !important;
+                height: 50px !important;
+                background: #a1887f !important;
+                border-radius: 4px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: flex-end !important;
+                padding-bottom: 4px !important;
+                position: relative !important;
+                box-shadow: 0 3px 6px rgba(0,0,0,0.2) !important;
             }
             
             /* Desk surface */
             .workstation::before {
-                content: '';
-                position: absolute;
-                bottom: 0;
-                left: 2px;
-                right: 2px;
-                height: 12px;
-                background: #6d4c41;
-                border-radius: 2px;
+                content: '' !important;
+                position: absolute !important;
+                bottom: 0 !important;
+                left: 2px !important;
+                right: 2px !important;
+                height: 12px !important;
+                background: #6d4c41 !important;
+                border-radius: 2px !important;
             }
             
             /* Hide non-working agents from desk area */
@@ -160,34 +163,34 @@
             }
             
             .workstation .agent-icon {
-                font-size: 22px;
-                z-index: 2;
-                margin-bottom: 8px;
+                font-size: 22px !important;
+                z-index: 2 !important;
+                margin-bottom: 8px !important;
             }
             
             .workstation .agent-name {
                 display: block !important;
-                font-size: 7px;
-                color: #333;
-                z-index: 2;
+                font-size: 7px !important;
+                color: #333 !important;
+                z-index: 2 !important;
             }
             
             /* Task badge above head */
             .workstation .ticket-badge {
                 display: block !important;
-                position: absolute;
-                top: -18px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: #1976d2;
-                color: white;
-                font-size: 6px;
-                font-weight: bold;
-                padding: 2px 5px;
-                border-radius: 3px;
-                white-space: nowrap;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                z-index: 10;
+                position: absolute !important;
+                top: -16px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                background: #1976d2 !important;
+                color: white !important;
+                font-size: 6px !important;
+                font-weight: bold !important;
+                padding: 2px 4px !important;
+                border-radius: 3px !important;
+                white-space: nowrap !important;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+                z-index: 10 !important;
             }
             
             .status-dot {
@@ -197,63 +200,63 @@
             /* === BEDS AREA (offline agents) === */
             .cots-area {
                 display: flex !important;
-                position: absolute;
-                bottom: 5%;
-                left: 50%;
-                transform: translateX(-50%);
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 6px;
-                justify-content: center;
-                max-width: 95%;
+                position: absolute !important;
+                bottom: 4% !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+                justify-content: center !important;
+                max-width: 95% !important;
             }
             
             .cot {
                 display: flex !important;
-                width: 48px;
-                height: 28px;
-                background: linear-gradient(180deg, #8d6e63 0%, #6d4c41 100%);
-                border-radius: 4px;
-                position: relative;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                align-items: center;
-                justify-content: center;
+                width: 50px !important;
+                height: 30px !important;
+                background: linear-gradient(180deg, #8d6e63 0%, #6d4c41 100%) !important;
+                border-radius: 4px !important;
+                position: relative !important;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
             
             .cot::before {
-                content: '';
-                position: absolute;
-                top: 3px;
-                left: 3px;
-                right: 3px;
-                bottom: 3px;
-                background: #e8e0d5;
-                border-radius: 2px;
+                content: '' !important;
+                position: absolute !important;
+                top: 3px !important;
+                left: 3px !important;
+                right: 3px !important;
+                bottom: 3px !important;
+                background: #e8e0d5 !important;
+                border-radius: 2px !important;
             }
             
             .cot .pillow {
-                position: absolute;
-                top: 5px;
-                left: 5px;
-                width: 10px;
-                height: 8px;
-                background: #fff;
-                border-radius: 2px;
-                z-index: 1;
+                position: absolute !important;
+                top: 6px !important;
+                left: 5px !important;
+                width: 10px !important;
+                height: 8px !important;
+                background: #fff !important;
+                border-radius: 2px !important;
+                z-index: 1 !important;
             }
             
             .cot .sleeping-agent {
-                position: relative;
-                font-size: 14px;
-                z-index: 2;
+                position: relative !important;
+                font-size: 14px !important;
+                z-index: 2 !important;
             }
             
             .cot .zzz {
-                position: absolute;
-                top: -8px;
-                right: 3px;
-                font-size: 8px;
-                z-index: 3;
+                position: absolute !important;
+                top: -6px !important;
+                right: 4px !important;
+                font-size: 8px !important;
+                z-index: 3 !important;
             }
         }
         
