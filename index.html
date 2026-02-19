@@ -1574,32 +1574,39 @@
                 display: none;
             }
         }
-        /* FINAL MOBILE OVERRIDE - Show ALL desks regardless of working class */
+        /* FINAL MOBILE OVERRIDE */
         @media screen and (max-width: 500px) {
+            /* HIDE BEDS - agents only appear at desks */
+            .cots-area,
+            .cot {
+                display: none !important;
+            }
+            
+            /* DESKS - moved lower to avoid birdcage */
             .workstation-row {
                 position: absolute !important;
                 display: flex !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-                top: 50% !important;
+                top: 58% !important;
                 right: 3% !important;
                 left: auto !important;
                 bottom: auto !important;
                 transform: translateY(-50%) !important;
                 flex-direction: column !important;
-                gap: 5px !important;
-                z-index: 999 !important;
+                gap: 4px !important;
+                z-index: 50 !important;
             }
             
-            /* Show ALL workstations - don't hide based on working class */
+            /* Show ALL workstations */
             .workstation,
             .workstation:not(.working),
             .workstation.working {
                 display: flex !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-                width: 48px !important;
-                height: 40px !important;
+                width: 46px !important;
+                height: 38px !important;
                 background: #8d6e63 !important;
                 border-radius: 4px !important;
                 flex-direction: column !important;
@@ -1611,24 +1618,25 @@
             
             /* Working desks get green glow */
             .workstation.working {
-                box-shadow: 0 0 8px rgba(76, 175, 80, 0.6) !important;
+                box-shadow: 0 0 10px rgba(76, 175, 80, 0.7) !important;
+                background: #7d5e53 !important;
             }
             
             .workstation .agent-icon {
-                font-size: 16px !important;
+                font-size: 15px !important;
                 display: block !important;
             }
             
             .workstation .agent-name {
                 font-size: 5px !important;
                 display: block !important;
-                color: #333 !important;
+                color: #fff !important;
             }
             
             /* Task badge above working agents */
             .workstation .ticket-badge {
                 position: absolute !important;
-                top: -12px !important;
+                top: -11px !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
                 font-size: 5px !important;
@@ -1642,6 +1650,12 @@
             /* Empty badge hidden */
             .workstation .ticket-badge:empty {
                 display: none !important;
+            }
+            
+            /* Birdcage - top right wall */
+            .birdcage {
+                top: 22% !important;
+                right: 5% !important;
             }
         }
     </style>
