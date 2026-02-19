@@ -1576,37 +1576,78 @@
         }
         /* FINAL MOBILE OVERRIDE */
         @media screen and (max-width: 500px) {
-            /* HIDE BEDS - agents only appear at desks */
-            .cots-area,
-            .cot {
-                display: none !important;
-            }
-            
-            /* DESKS - moved lower to avoid birdcage */
-            .workstation-row {
-                position: absolute !important;
+            /* === BEDS - LEFT SIDE (always visible) === */
+            .cots-area {
                 display: flex !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                top: 58% !important;
-                right: 3% !important;
-                left: auto !important;
-                bottom: auto !important;
+                position: absolute !important;
+                top: 55% !important;
+                left: 3% !important;
                 transform: translateY(-50%) !important;
                 flex-direction: column !important;
-                gap: 4px !important;
+                gap: 3px !important;
                 z-index: 50 !important;
             }
             
-            /* Show ALL workstations */
-            .workstation,
-            .workstation:not(.working),
-            .workstation.working {
+            .cot {
                 display: flex !important;
-                visibility: visible !important;
-                opacity: 1 !important;
                 width: 46px !important;
-                height: 38px !important;
+                height: 24px !important;
+                background: linear-gradient(180deg, #8d6e63 0%, #6d4c41 100%) !important;
+                border-radius: 3px !important;
+                position: relative !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            
+            .cot .pillow {
+                position: absolute !important;
+                left: 3px !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                width: 8px !important;
+                height: 6px !important;
+                background: white !important;
+                border-radius: 2px !important;
+            }
+            
+            /* Agent in bed - visible when NOT working */
+            .cot .sleeping-agent {
+                font-size: 12px !important;
+                display: block !important;
+            }
+            
+            .cot .zzz {
+                position: absolute !important;
+                top: -6px !important;
+                right: 2px !important;
+                font-size: 7px !important;
+                display: block !important;
+            }
+            
+            /* When agent is working, hide them from bed (bed is empty) */
+            .cot.working .sleeping-agent,
+            .cot.working .zzz {
+                display: none !important;
+            }
+            
+            /* === DESKS - RIGHT SIDE (always visible) === */
+            .workstation-row {
+                position: absolute !important;
+                display: flex !important;
+                top: 55% !important;
+                right: 3% !important;
+                left: auto !important;
+                transform: translateY(-50%) !important;
+                flex-direction: column !important;
+                gap: 3px !important;
+                z-index: 50 !important;
+            }
+            
+            /* All desks visible (furniture stays) */
+            .workstation {
+                display: flex !important;
+                width: 46px !important;
+                height: 36px !important;
                 background: #8d6e63 !important;
                 border-radius: 4px !important;
                 flex-direction: column !important;
@@ -1616,27 +1657,35 @@
                 box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
             }
             
+            /* Agent at desk - hidden when NOT working (empty desk) */
+            .workstation:not(.working) .agent-icon {
+                opacity: 0.3 !important;
+            }
+            
+            /* Agent at desk - visible when working */
+            .workstation.working .agent-icon {
+                opacity: 1 !important;
+                font-size: 14px !important;
+            }
+            
             /* Working desks get green glow */
             .workstation.working {
                 box-shadow: 0 0 10px rgba(76, 175, 80, 0.7) !important;
-                background: #7d5e53 !important;
             }
             
             .workstation .agent-icon {
-                font-size: 15px !important;
-                display: block !important;
+                font-size: 14px !important;
             }
             
             .workstation .agent-name {
                 font-size: 5px !important;
-                display: block !important;
                 color: #fff !important;
             }
             
             /* Task badge above working agents */
             .workstation .ticket-badge {
                 position: absolute !important;
-                top: -11px !important;
+                top: -10px !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
                 font-size: 5px !important;
@@ -1647,15 +1696,14 @@
                 white-space: nowrap !important;
             }
             
-            /* Empty badge hidden */
             .workstation .ticket-badge:empty {
                 display: none !important;
             }
             
             /* Birdcage - top right wall */
             .birdcage {
-                top: 22% !important;
-                right: 5% !important;
+                top: 20% !important;
+                right: 8% !important;
             }
         }
     </style>
@@ -1719,34 +1767,49 @@
             <div class="mail-chute-label">TELEGRAM</div>
         </div>
         
-        <!-- Cots for sleeping/offline agents -->
+        <!-- Beds for ALL agents (one per agent) -->
         <div class="cots-area">
-            <div class="cot" id="cot-beta" data-agent="beta">
+            <div class="cot" data-agent="alice">
+                <div class="pillow"></div>
+                <span class="sleeping-agent">🦜</span>
+                <span class="zzz">💤</span>
+            </div>
+            <div class="cot" data-agent="alpha">
+                <div class="pillow"></div>
+                <span class="sleeping-agent">🐺</span>
+                <span class="zzz">💤</span>
+            </div>
+            <div class="cot" data-agent="beta">
                 <div class="pillow"></div>
                 <span class="sleeping-agent">🦊</span>
                 <span class="zzz">💤</span>
             </div>
-            <div class="cot" id="cot-gamma" data-agent="gamma">
+            <div class="cot" data-agent="gamma">
                 <div class="pillow"></div>
                 <span class="sleeping-agent">🦔</span>
                 <span class="zzz">💤</span>
             </div>
-            <div class="cot" id="cot-delta" data-agent="delta">
+            <div class="cot" data-agent="delta">
                 <div class="pillow"></div>
                 <span class="sleeping-agent">🦉</span>
                 <span class="zzz">💤</span>
             </div>
-            <div class="cot" id="cot-epsilon" data-agent="epsilon">
+            <div class="cot" data-agent="epsilon">
                 <div class="pillow"></div>
                 <span class="sleeping-agent">🐙</span>
                 <span class="zzz">💤</span>
             </div>
-            <div class="cot" id="cot-eta" data-agent="eta">
+            <div class="cot" data-agent="zeta">
+                <div class="pillow"></div>
+                <span class="sleeping-agent">🦄</span>
+                <span class="zzz">💤</span>
+            </div>
+            <div class="cot" data-agent="eta">
                 <div class="pillow"></div>
                 <span class="sleeping-agent">🐼</span>
                 <span class="zzz">💤</span>
             </div>
-            <div class="cot" id="cot-theta" data-agent="theta">
+            <div class="cot" data-agent="theta">
                 <div class="pillow"></div>
                 <span class="sleeping-agent">🦝</span>
                 <span class="zzz">💤</span>
@@ -2543,15 +2606,22 @@
         }
 
         function updateAgentBadges(tasks) {
-            // Clear all existing badges first
+            // Clear all existing badges and working status
             document.querySelectorAll('.workstation').forEach(workstation => {
                 const badge = workstation.querySelector('.ticket-badge');
                 const statusDot = workstation.querySelector('.status-dot');
+                const agentKey = workstation.getAttribute('data-agent');
                 
                 badge.textContent = '';
                 badge.style.display = 'none';
                 workstation.classList.remove('working');
                 statusDot.classList.remove('working');
+                
+                // Also update the matching bed - agent goes to bed when not working
+                const bed = document.querySelector(`.cot[data-agent="${agentKey}"]`);
+                if (bed) {
+                    bed.classList.remove('working');
+                }
             });
 
             // Update badges with active tasks
@@ -2560,7 +2630,7 @@
 
                 const agentKey = findAgentKey(task.assignee);
                 if (agentKey) {
-                    const workstation = document.querySelector(`[data-agent="${agentKey}"]`);
+                    const workstation = document.querySelector(`.workstation[data-agent="${agentKey}"]`);
                     if (workstation) {
                         const badge = workstation.querySelector('.ticket-badge');
                         const statusDot = workstation.querySelector('.status-dot');
@@ -2573,6 +2643,12 @@
                         if (task.status === 'In Progress') {
                             workstation.classList.add('working');
                             statusDot.classList.add('working');
+                            
+                            // Also update the matching bed - agent leaves bed when working
+                            const bed = document.querySelector(`.cot[data-agent="${agentKey}"]`);
+                            if (bed) {
+                                bed.classList.add('working');
+                            }
                         }
                     }
                 }
