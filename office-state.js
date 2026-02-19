@@ -31,6 +31,9 @@ class OfficeStateManager {
             'cot-6': { x: 780, y: 255 },
             'cot-7': { x: 780, y: 270 },
             'board': { x: 450, y: 200 }, // Kanban board area
+            'pool-table': { x: 400, y: 280 }, // Pool table area
+            'water-cooler': { x: 200, y: 300 }, // Water cooler chat area
+            'kitchen': { x: 100, y: 300 }, // Kitchen for coffee runs
             'desk-alice': { x: 50, y: 520 },
             'desk-alpha': { x: 120, y: 520 },
             'desk-beta': { x: 190, y: 520 },
@@ -42,12 +45,22 @@ class OfficeStateManager {
             'desk-theta': { x: 610, y: 520 }
         };
         
+        // Track agent interactions and proximity
+        this.agentInteractions = {
+            lastSpeechBubble: 0,
+            activeInteractions: new Map(),
+            proximityThreshold: 80 // pixels for proximity detection
+        };
+        
         this.loadState();
         this.bindEvents();
         this.syncUIWithState();
         
         // Start personality-based idle animations
         this.startIdleAnimationLoops();
+        
+        // Start agent interaction system
+        this.startInteractionSystem();
         
         console.log('🐙 Epsilon State Manager initialized - All tentacles deployed!');
     }
@@ -629,6 +642,270 @@ class OfficeStateManager {
                 }
             });
         }, 5000); // Check every 5 seconds
+    }
+    
+    /**
+     * AGENT INTERACTION SYSTEM
+     */
+    
+    /**
+     * Check proximity between agents and trigger interactions
+     */
+    checkAgentProximity() {
+        const agents = Object.entries(this.state.agents);
+        const idleAgents = agents.filter(([name, agent]) => agent.state === 'idle');
+        
+        // Check for pool table interactions
+        this.checkPoolTableInteraction(idleAgents);
+        
+        // Check for general proximity interactions
+        this.checkGeneralProximity(idleAgents);
+        
+        // Trigger random speech bubbles
+        if (Math.random() < 0.2) { // 20% chance per check
+            this.triggerRandomSpeechBubble();
+        }
+    }
+    
+    /**
+     * Check if multiple idle agents are near the pool table
+     */
+    checkPoolTableInteraction(idleAgents) {
+        const poolTableLocation = this.locations['pool-table'];
+        const agentsNearPool = [];
+        
+        idleAgents.forEach(([agentName, agent]) => {
+            const agentLocation = this.locations[agent.location] || poolTableLocation;
+            const distance = this.calculateDistance(agentLocation, poolTableLocation);
+            
+            if (distance < this.agentInteractions.proximityThreshold) {
+                agentsNearPool.push(agentName);
+            }
+        });
+        
+        // If 2+ agents are near the pool table, start pool game
+        if (agentsNearPool.length >= 2 && !this.agentInteractions.activeInteractions.has('pool-game')) {
+            this.startPoolGameInteraction(agentsNearPool);
+        }
+    }
+    
+    /**
+     * Start pool game interaction between agents
+     */
+    startPoolGameInteraction(agentNames) {
+        const interactionId = 'pool-game-' + Date.now();
+        this.agentInteractions.activeInteractions.set('pool-game', {
+            id: interactionId,
+            participants: agentNames,
+            startTime: Date.now(),
+            type: 'pool-game'
+        });
+        
+        // Create visual indication of pool game
+        this.createPoolGameVisual(agentNames);
+        
+        // Schedule end of interaction
+        setTimeout(() => {
+            this.endInteraction('pool-game');
+        }, 15000 + Math.random() * 10000); // 15-25 seconds
+        
+        console.log(`🎱 Pool game started with: ${agentNames.join(', ')}`);
+    }
+    
+    /**
+     * Create visual representation of pool game
+     */
+    createPoolGameVisual(agentNames) {
+        const poolTable = document.querySelector('.pool-table');
+        if (!poolTable) return;
+        
+        // Create interaction bubble
+        const gameIndicator = document.createElement('div');
+        gameIndicator.className = 'pool-game-indicator';
+        gameIndicator.style.position = 'absolute';
+        gameIndicator.style.top = '-40px';
+        gameIndicator.style.left = '50%';
+        gameIndicator.style.transform = 'translateX(-50%)';
+        gameIndicator.style.zIndex = '1000';
+        gameIndicator.style.background = 'rgba(0,0,0,0.8)';
+        gameIndicator.style.color = 'white';
+        gameIndicator.style.padding = '5px 10px';
+        gameIndicator.style.borderRadius = '15px';
+        gameIndicator.style.fontSize = '12px';
+        gameIndicator.style.whiteSpace = 'nowrap';
+        
+        // Add participant icons and game text
+        const participantIcons = agentNames.map(name => this.state.agents[name].icon).join(' ');
+        gameIndicator.innerHTML = `${participantIcons} 🎱 Pool Game!`;
+        
+        poolTable.appendChild(gameIndicator);
+        
+        // Add slight animation to pool balls
+        const poolBalls = poolTable.querySelector('.pool-balls');
+        if (poolBalls) {
+            poolBalls.style.animation = 'pool-game-shake 0.5s ease-in-out infinite alternate';
+        }
+    }
+    
+    /**
+     * Check for general proximity interactions between agents
+     */
+    checkGeneralProximity(idleAgents) {
+        for (let i = 0; i < idleAgents.length; i++) {
+            for (let j = i + 1; j < idleAgents.length; j++) {
+                const [agent1Name, agent1] = idleAgents[i];
+                const [agent2Name, agent2] = idleAgents[j];
+                
+                const location1 = this.locations[agent1.location];
+                const location2 = this.locations[agent2.location];
+                
+                if (location1 && location2) {
+                    const distance = this.calculateDistance(location1, location2);
+                    
+                    if (distance < this.agentInteractions.proximityThreshold) {
+                        // Chance for casual interaction
+                        if (Math.random() < 0.1) { // 10% chance when in proximity
+                            this.triggerProximityInteraction(agent1Name, agent2Name);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Trigger interaction between two nearby agents
+     */
+    triggerProximityInteraction(agent1Name, agent2Name) {
+        const personality1 = this.agentPersonalities[agent1Name];
+        const personality2 = this.agentPersonalities[agent2Name];
+        
+        // Create conversation bubble
+        const conversations = [
+            `${agent1Name}: ${personality1.speechPatterns[0]}`,
+            `${agent2Name}: ${personality2.speechPatterns[0]}`,
+            `${agent1Name}: How's your task going?`,
+            `${agent2Name}: Making good progress!`,
+            `${agent1Name}: Want to grab coffee later?`,
+            `${agent2Name}: Sounds great!`
+        ];
+        
+        const randomConversation = conversations[Math.floor(Math.random() * conversations.length)];
+        this.createSpeechBubble(agent1Name, randomConversation);
+        
+        console.log(`💬 Proximity interaction: ${agent1Name} and ${agent2Name}`);
+    }
+    
+    /**
+     * Create speech bubble for work banter
+     */
+    createSpeechBubble(agentName, message) {
+        const now = Date.now();
+        if (now - this.agentInteractions.lastSpeechBubble < 3000) return; // Cooldown
+        this.agentInteractions.lastSpeechBubble = now;
+        
+        const agent = this.state.agents[agentName];
+        const agentLocation = this.locations[agent.location];
+        if (!agentLocation) return;
+        
+        const bubble = document.createElement('div');
+        bubble.className = 'speech-bubble';
+        bubble.style.position = 'absolute';
+        bubble.style.left = (agentLocation.x + 20) + 'px';
+        bubble.style.top = (agentLocation.y - 40) + 'px';
+        bubble.style.background = 'white';
+        bubble.style.border = '2px solid #333';
+        bubble.style.borderRadius = '15px';
+        bubble.style.padding = '8px 12px';
+        bubble.style.fontSize = '12px';
+        bubble.style.maxWidth = '200px';
+        bubble.style.zIndex = '1000';
+        bubble.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+        bubble.textContent = message;
+        
+        // Add tail to bubble
+        bubble.style.position = 'relative';
+        bubble.innerHTML += '<div style="position: absolute; bottom: -8px; left: 20px; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid white;"></div>';
+        
+        const container = document.querySelector('.office-container');
+        if (container) {
+            container.appendChild(bubble);
+            
+            // Remove bubble after delay
+            setTimeout(() => {
+                if (bubble.parentNode) {
+                    bubble.remove();
+                }
+            }, 4000);
+        }
+    }
+    
+    /**
+     * Trigger random work banter speech bubbles
+     */
+    triggerRandomSpeechBubble() {
+        const workingAgents = Object.entries(this.state.agents)
+            .filter(([name, agent]) => agent.state === 'working')
+            .map(([name]) => name);
+            
+        if (workingAgents.length === 0) return;
+        
+        const randomAgent = workingAgents[Math.floor(Math.random() * workingAgents.length)];
+        const personality = this.agentPersonalities[randomAgent];
+        
+        const workBanter = [
+            ...personality.speechPatterns,
+            'This code is looking good!',
+            'Almost done with this task...',
+            'Need more coffee!',
+            'Great teamwork everyone!',
+            'Anyone else hear that?',
+            'Time for a quick break?'
+        ];
+        
+        const randomBanter = workBanter[Math.floor(Math.random() * workBanter.length)];
+        this.createSpeechBubble(randomAgent, randomBanter);
+    }
+    
+    /**
+     * Calculate distance between two points
+     */
+    calculateDistance(point1, point2) {
+        const dx = point1.x - point2.x;
+        const dy = point1.y - point2.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+    
+    /**
+     * End an active interaction
+     */
+    endInteraction(interactionType) {
+        const interaction = this.agentInteractions.activeInteractions.get(interactionType);
+        if (!interaction) return;
+        
+        // Clean up visual elements
+        if (interactionType === 'pool-game') {
+            const poolTable = document.querySelector('.pool-table');
+            if (poolTable) {
+                const indicator = poolTable.querySelector('.pool-game-indicator');
+                const poolBalls = poolTable.querySelector('.pool-balls');
+                
+                if (indicator) indicator.remove();
+                if (poolBalls) poolBalls.style.animation = '';
+            }
+        }
+        
+        this.agentInteractions.activeInteractions.delete(interactionType);
+        console.log(`🔚 Interaction ended: ${interactionType}`);
+    }
+    
+    /**
+     * Start proximity checking loops
+     */
+    startInteractionSystem() {
+        setInterval(() => {
+            this.checkAgentProximity();
+        }, 3000); // Check every 3 seconds
     }
     
     /**
