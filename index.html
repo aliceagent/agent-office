@@ -99,7 +99,7 @@
         .pool-table {
             position: absolute;
             top: 50%;
-            left: 50%;
+            left: 35%;
             transform: translate(-50%, -50%);
             width: 180px;
             height: 100px;
@@ -316,6 +316,14 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             animation: ticketFloat 2s ease-in-out infinite;
             display: none;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        
+        .workstation .ticket-badge:hover {
+            background: #1565c0;
+            transform: translateX(-50%) scale(1.1);
+            animation: none;
         }
         
         .workstation.working .ticket-badge {
@@ -828,55 +836,55 @@
         <!-- Workstations -->
         <div class="workstation-row">
             <div class="workstation working" data-agent="alice">
-                <div class="ticket-badge">OFFICE-1-1</div>
+                <div class="ticket-badge" onclick="openNotionTask(this, event)">OFFICE-1-1</div>
                 <div class="status-dot working"></div>
                 <span class="agent-icon">🦜</span>
                 <span class="agent-name">Alice</span>
             </div>
             <div class="workstation working" data-agent="alpha">
-                <div class="ticket-badge">OFFICE-1-2</div>
+                <div class="ticket-badge" onclick="openNotionTask(this, event)">OFFICE-1-2</div>
                 <div class="status-dot working"></div>
                 <span class="agent-icon">🐺</span>
                 <span class="agent-name">Alpha</span>
             </div>
             <div class="workstation" data-agent="beta">
-                <div class="ticket-badge"></div>
+                <div class="ticket-badge" onclick="openNotionTask(this, event)"></div>
                 <div class="status-dot"></div>
                 <span class="agent-icon">🦊</span>
                 <span class="agent-name">Beta</span>
             </div>
             <div class="workstation" data-agent="gamma">
-                <div class="ticket-badge"></div>
+                <div class="ticket-badge" onclick="openNotionTask(this, event)"></div>
                 <div class="status-dot"></div>
                 <span class="agent-icon">🦔</span>
                 <span class="agent-name">Gamma</span>
             </div>
             <div class="workstation" data-agent="delta">
-                <div class="ticket-badge"></div>
+                <div class="ticket-badge" onclick="openNotionTask(this, event)"></div>
                 <div class="status-dot"></div>
                 <span class="agent-icon">🦉</span>
                 <span class="agent-name">Delta</span>
             </div>
             <div class="workstation" data-agent="epsilon">
-                <div class="ticket-badge"></div>
+                <div class="ticket-badge" onclick="openNotionTask(this, event)"></div>
                 <div class="status-dot"></div>
                 <span class="agent-icon">🐙</span>
                 <span class="agent-name">Epsilon</span>
             </div>
             <div class="workstation working" data-agent="zeta">
-                <div class="ticket-badge">OFFICE-1-4</div>
+                <div class="ticket-badge" onclick="openNotionTask(this, event)">OFFICE-1-4</div>
                 <div class="status-dot working"></div>
                 <span class="agent-icon">🦄</span>
                 <span class="agent-name">Zeta</span>
             </div>
             <div class="workstation" data-agent="eta">
-                <div class="ticket-badge"></div>
+                <div class="ticket-badge" onclick="openNotionTask(this, event)"></div>
                 <div class="status-dot"></div>
                 <span class="agent-icon">🐼</span>
                 <span class="agent-name">Eta</span>
             </div>
             <div class="workstation" data-agent="theta">
-                <div class="ticket-badge"></div>
+                <div class="ticket-badge" onclick="openNotionTask(this, event)"></div>
                 <div class="status-dot"></div>
                 <span class="agent-icon">🦝</span>
                 <span class="agent-name">Theta</span>
@@ -973,6 +981,40 @@
             chute.appendChild(message);
             
             setTimeout(() => message.remove(), 800);
+        }
+        
+        // Open Notion task in new tab
+        // Mission Control Database ID: 2fe419064d3081bc8155ee2719c1d365
+        const NOTION_DATABASE_ID = '2fe419064d3081bc8155ee2719c1d365';
+        
+        // Map task IDs to Notion page IDs (populated dynamically or from state)
+        const taskNotionPageIds = {};
+        
+        function openNotionTask(element, event) {
+            event.stopPropagation(); // Prevent workstation click
+            
+            const taskId = element.textContent.trim();
+            if (!taskId) return;
+            
+            // Check if we have a specific page ID for this task
+            const pageId = taskNotionPageIds[taskId];
+            
+            let notionUrl;
+            if (pageId) {
+                // Open specific task page
+                notionUrl = `https://notion.so/${pageId.replace(/-/g, '')}`;
+            } else {
+                // Open Mission Control board - it will show all tasks
+                // User can find the task by ID there
+                notionUrl = `https://notion.so/${NOTION_DATABASE_ID}`;
+            }
+            
+            window.open(notionUrl, '_blank');
+        }
+        
+        // Register a Notion page ID for a task
+        function registerNotionTask(taskId, notionPageId) {
+            taskNotionPageIds[taskId] = notionPageId;
         }
         
         // Move agent to location
