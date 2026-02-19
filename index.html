@@ -2805,17 +2805,39 @@
         
         // Animate agent walking along path
         function animateAgentWalk(agentKey, emoji, fromEl, toEl, callback) {
+            console.log(`🚶‍♂️ ANIMATION START: ${agentKey} (${emoji})`);
+            console.log(`🚶‍♂️ From element:`, fromEl);
+            console.log(`🚶‍♂️ To element:`, toEl);
+            
+            if (!fromEl || !toEl) {
+                console.error(`❌ ANIMATION FAILED: Missing elements for ${agentKey}`);
+                if (callback) callback();
+                return;
+            }
+            
             const from = getElementCenter(fromEl);
             const to = getElementCenter(toEl);
-            const path = getWalkPath(from, to);
+            console.log(`🚶‍♂️ From coords:`, from);
+            console.log(`🚶‍♂️ To coords:`, to);
             
-            // Create walking sprite
+            const path = getWalkPath(from, to);
+            console.log(`🚶‍♂️ Path waypoints:`, path);
+            
+            // Create walking sprite - SUPER VISIBLE FOR DEBUGGING
             const walker = document.createElement('div');
             walker.className = 'walking-agent walking';
             walker.textContent = emoji;
             walker.style.left = from.x + 'px';
             walker.style.top = from.y + 'px';
-            document.querySelector('.office-container').appendChild(walker);
+            walker.style.fontSize = '40px'; // Bigger for visibility
+            walker.style.background = 'rgba(255,255,0,0.8)'; // Yellow background
+            walker.style.borderRadius = '50%';
+            walker.style.padding = '5px';
+            
+            const container = document.querySelector('.office-container');
+            console.log(`🚶‍♂️ Container:`, container);
+            container.appendChild(walker);
+            console.log(`🚶‍♂️ Walker appended at (${from.x}, ${from.y})`);
             
             let currentPoint = 0;
             const speed = 40; // pixels per frame interval (slower for casual walking)
@@ -2879,12 +2901,17 @@
             });
             
             // Detect state changes and animate
+            console.log('🔍 Previous states:', JSON.stringify(previousAgentStates));
+            console.log('🔍 New states:', JSON.stringify(newStates));
+            
             allAgents.forEach(agentKey => {
                 const wasWorking = previousAgentStates[agentKey]?.working || false;
                 const isWorking = newStates[agentKey]?.working || false;
                 const workstation = document.querySelector(`.workstation[data-agent="${agentKey}"]`);
                 const bed = document.querySelector(`.cot[data-agent="${agentKey}"]`);
                 const emoji = agentData[agentKey]?.emoji || '🤖';
+                
+                console.log(`🔍 ${agentKey}: wasWorking=${wasWorking}, isWorking=${isWorking}, bed=${!!bed}, workstation=${!!workstation}`);
                 
                 // Skip Alice - she doesn't animate (always at desk)
                 if (agentKey === 'alice') {
