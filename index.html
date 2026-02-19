@@ -1975,12 +1975,17 @@
     </div>
     
     <!-- Debug Panel -->
-    <div id="debugPanel" style="position:fixed;bottom:60px;left:5px;right:5px;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:10px;padding:8px;border-radius:5px;max-height:150px;overflow-y:auto;z-index:9999;">
+    <div id="debugPanel" style="position:fixed;bottom:60px;left:5px;right:5px;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:10px;padding:8px;border-radius:5px;max-height:180px;overflow-y:auto;z-index:9999;">
         <div><strong>🔧 DEBUG MODE</strong></div>
         <div id="debugLog">Loading...</div>
         <div id="syncStatus">Sync: Not started</div>
         <div id="taskCount">Tasks: 0</div>
         <div id="workingAgents">Working: None</div>
+        <div style="margin-top:5px;">
+            <button onclick="syncBadgesFromWorker()" style="font-size:9px;padding:2px 6px;margin-right:4px;">🔄 Force Sync</button>
+            <button onclick="testWalkAnimation('beta')" style="font-size:9px;padding:2px 6px;margin-right:4px;">🚶 Test Beta Walk</button>
+            <button onclick="testWalkAnimation('gamma')" style="font-size:9px;padding:2px 6px;">🚶 Test Gamma Walk</button>
+        </div>
     </div>
 
     <!-- Agent Popover -->
@@ -2750,6 +2755,7 @@
                 
             } catch (error) {
                 console.error('❌ Badge sync failed:', error);
+                lastSyncError = error.message || 'Unknown error';
                 console.log('🔄 Using demo data with test tasks...');
                 // Fallback to demo data if worker unavailable
                 useDemoData();
@@ -3085,14 +3091,18 @@
             return null;
         }
 
+        let lastSyncError = null;
+        
         function useDemoData() {
-            console.log('🦜 Using demo data with GAMMA-LIVE-TEST and EPSILON-QA-FIX');
+            console.log('🦜 Using demo data (worker unavailable)');
             // Test data to show what SHOULD happen
             currentTasks = [
                 { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' },
                 { taskId: 'GAMMA-LIVE-TEST', assignee: 'Gamma', status: 'In Progress', url: 'https://notion.so/gamma-test' },
                 { taskId: 'EPSILON-QA-FIX', assignee: 'Epsilon', status: 'In Progress', url: 'https://notion.so/epsilon-qa' }
             ];
+            lastSyncTime = new Date().toISOString();
+            lastSyncError = 'Worker unavailable - using demo data';
             updateAgentBadges(currentTasks);
             updateDebugPanel();
         }
@@ -3136,7 +3146,9 @@
         function updateDebugPanel() {
             const now = new Date().toLocaleTimeString();
             document.getElementById('debugLog').innerHTML = `System running at ${now}`;
-            document.getElementById('syncStatus').innerHTML = `Sync: ${lastSyncTime ? new Date(lastSyncTime).toLocaleTimeString() : 'Never'}`;
+            let syncText = lastSyncTime ? new Date(lastSyncTime).toLocaleTimeString() : 'Never';
+            if (lastSyncError) syncText += ` <span style="color:red">(${lastSyncError})</span>`;
+            document.getElementById('syncStatus').innerHTML = `Sync: ${syncText}`;
             document.getElementById('taskCount').innerHTML = `Tasks: ${currentTasks ? currentTasks.length : 0}`;
             
             const workingAgents = [];
@@ -3171,6 +3183,34 @@
             updateAgentBadges(testTasks);
             updateDebugPanel();
             return testTasks;
+        };
+        
+        // Manual walk animation test
+        window.testWalkAnimation = function(agentKey) {
+            console.log(`🧪 Testing walk animation for ${agentKey}`);
+            const bed = document.querySelector(`.cot[data-agent="${agentKey}"]`);
+            const workstation = document.querySelector(`.workstation[data-agent="${agentKey}"]`);
+            const emoji = agentData[agentKey]?.emoji || '🤖';
+            
+            if (!bed || !workstation) {
+                console.error(`❌ Could not find bed or workstation for ${agentKey}`);
+                alert(`Could not find bed or workstation for ${agentKey}`);
+                return;
+            }
+            
+            console.log(`🧪 Found bed:`, bed);
+            console.log(`🧪 Found workstation:`, workstation);
+            
+            // Test walk from bed to desk
+            animateAgentWalk(agentKey, emoji, bed, workstation, () => {
+                console.log(`✅ ${agentKey} arrived at desk!`);
+                // After 2 seconds, walk back to bed
+                setTimeout(() => {
+                    animateAgentWalk(agentKey, emoji, workstation, bed, () => {
+                        console.log(`💤 ${agentKey} back in bed!`);
+                    });
+                }, 2000);
+            });
         };
 
         // Export for debugging
