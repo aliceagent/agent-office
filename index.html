@@ -69,7 +69,7 @@
         .bookshelf {
             position: absolute;
             top: 20px;
-            left: 50%;
+            left: 40%;
             transform: translateX(-50%);
             width: 500px;
             height: 150px;
@@ -99,10 +99,10 @@
         .pool-table {
             position: absolute;
             top: 50%;
-            left: 50%;
+            left: 40%;
             transform: translate(-50%, -50%);
-            width: 180px;
-            height: 100px;
+            width: 120px;
+            height: 70px;
             background: #1b5e20;
             border: 8px solid #5d4037;
             border-radius: 8px;
@@ -112,7 +112,7 @@
         .pool-balls {
             position: absolute;
             top: 50%;
-            left: 50%;
+            left: 40%;
             transform: translate(-50%, -50%);
             font-size: 12px;
         }
@@ -140,37 +140,6 @@
             border-radius: 4px 4px 0 0;
         }
         
-        /* Armchairs */
-        .armchair {
-            position: absolute;
-            width: 45px;
-            height: 40px;
-            background: #5d4037;
-            border-radius: 8px 8px 4px 4px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-        }
-        
-        .armchair::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 8px;
-            right: 8px;
-            height: 20px;
-            background: #6d4c41;
-            border-radius: 4px 4px 0 0;
-        }
-        
-        .armchair::after {
-            content: '🪑';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 16px;
-            opacity: 0.7;
-        }
-        
         /* Birdcage */
         .birdcage {
             position: absolute;
@@ -187,7 +156,7 @@
             content: '🦜';
             position: absolute;
             top: 50%;
-            left: 50%;
+            left: 40%;
             transform: translate(-50%, -50%);
             font-size: 24px;
         }
@@ -304,7 +273,7 @@
         .workstation .ticket-badge {
             position: absolute;
             top: -20px;
-            left: 50%;
+            left: 40%;
             transform: translateX(-50%);
             background: #1976d2;
             color: white;
@@ -362,7 +331,7 @@
             content: attr(data-name);
             position: absolute;
             bottom: 100%;
-            left: 50%;
+            left: 40%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.8);
             color: white;
@@ -388,7 +357,7 @@
             padding: 12px;
             border-radius: 8px;
             font-size: 11px;
-            max-width: 180px;
+            max-width: 120px;
         }
         
         .status-panel h3 {
@@ -475,7 +444,7 @@
         .door {
             position: absolute;
             bottom: 10px;
-            left: 50%;
+            left: 40%;
             transform: translateX(-50%);
             width: 50px;
             height: 80px;
@@ -773,8 +742,6 @@
         <div class="couch"></div>
         
         <!-- Armchairs -->
-        <div class="armchair" style="bottom: 200px; left: 180px;"></div>
-        <div class="armchair" style="bottom: 200px; left: 240px;"></div>
         
         <!-- Birdcage -->
         <div class="birdcage"></div>
