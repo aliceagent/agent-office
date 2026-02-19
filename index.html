@@ -1348,10 +1348,158 @@
     <!-- 🐙 EPSILON'S STATE MANAGEMENT SYSTEM -->
     <script src="office-state.js"></script>
     
+    <!-- 🎯 REAL-TIME BADGE SYNC SYSTEM -->
+    <script>
+        // Real-time badge sync from Cloudflare Worker
+        const WORKER_ENDPOINT = 'https://office-notion-proxy.your-worker-domain.workers.dev/api/tasks';
+        const AGENT_NAME_MAP = {
+            'alice': ['Alice', 'alice', 'ALICE'],
+            'alpha': ['Alpha', 'Worker-Alpha', 'ALPHA', 'alpha'],
+            'beta': ['Beta', 'Worker-Beta', 'BETA', 'beta'], 
+            'gamma': ['Gamma', 'Worker-Gamma', 'GAMMA', 'gamma'],
+            'delta': ['Delta', 'Worker-Delta', 'DELTA', 'delta'],
+            'epsilon': ['Epsilon', 'Worker-Epsilon', 'EPSILON', 'epsilon'],
+            'zeta': ['Zeta', 'Worker-Zeta', 'ZETA', 'zeta'],
+            'eta': ['Eta', 'Worker-Eta', 'ETA', 'eta'],
+            'theta': ['Theta', 'Worker-Theta', 'THETA', 'theta']
+        };
+
+        let lastSyncTime = null;
+        let currentTasks = [];
+
+        async function syncBadgesFromWorker() {
+            try {
+                console.log('🔄 Syncing badges from Cloudflare Worker...');
+                
+                const response = await fetch(WORKER_ENDPOINT);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Worker returned error');
+                }
+
+                currentTasks = data.tasks;
+                lastSyncTime = new Date().toISOString();
+                
+                updateAgentBadges(data.tasks);
+                console.log(`✅ Synced ${data.tasks.length} tasks from Mission Control`);
+                
+            } catch (error) {
+                console.error('❌ Badge sync failed:', error);
+                // Fallback to demo data if worker unavailable
+                useDemoData();
+            }
+        }
+
+        function updateAgentBadges(tasks) {
+            // Clear all existing badges first
+            document.querySelectorAll('.workstation').forEach(workstation => {
+                const badge = workstation.querySelector('.ticket-badge');
+                const statusDot = workstation.querySelector('.status-dot');
+                
+                badge.textContent = '';
+                badge.style.display = 'none';
+                workstation.classList.remove('working');
+                statusDot.classList.remove('working');
+            });
+
+            // Update badges with active tasks
+            tasks.forEach(task => {
+                if (!task.assignee || task.status === 'Complete') return;
+
+                const agentKey = findAgentKey(task.assignee);
+                if (agentKey) {
+                    const workstation = document.querySelector(`[data-agent="${agentKey}"]`);
+                    if (workstation) {
+                        const badge = workstation.querySelector('.ticket-badge');
+                        const statusDot = workstation.querySelector('.status-dot');
+                        
+                        badge.textContent = task.taskId;
+                        badge.style.display = 'block';
+                        badge.onclick = (e) => openNotionTask(badge, e, task.url);
+                        
+                        // Update working status based on task status
+                        if (task.status === 'In Progress') {
+                            workstation.classList.add('working');
+                            statusDot.classList.add('working');
+                        }
+                    }
+                }
+            });
+        }
+
+        function findAgentKey(assigneeName) {
+            for (const [key, variants] of Object.entries(AGENT_NAME_MAP)) {
+                if (variants.some(variant => 
+                    assigneeName.toLowerCase().includes(variant.toLowerCase()) ||
+                    variant.toLowerCase().includes(assigneeName.toLowerCase())
+                )) {
+                    return key;
+                }
+            }
+            return null;
+        }
+
+        function useDemoData() {
+            console.log('🎭 Using demo data (Worker unavailable)');
+            updateAgentBadges([
+                { taskId: 'OFFICE-1-1', assignee: 'Alice', status: 'In Progress', url: 'https://notion.so/demo' },
+                { taskId: 'OFFICE-1-2', assignee: 'Worker-Alpha', status: 'In Progress', url: 'https://notion.so/demo' },
+                { taskId: 'OFFICE-1-4', assignee: 'Zeta', status: 'In Progress', url: 'https://notion.so/demo' }
+            ]);
+        }
+
+        // Enhanced openNotionTask with URL support
+        function openNotionTask(element, event, taskUrl = null) {
+            event.stopPropagation();
+            
+            const taskId = element.textContent.trim();
+            if (!taskId) return;
+
+            // Use provided URL or fallback to existing logic
+            if (taskUrl) {
+                window.open(taskUrl, '_blank');
+                return;
+            }
+
+            // Existing fallback logic
+            const pageId = taskNotionPageIds[taskId];
+            let notionUrl;
+            if (pageId) {
+                notionUrl = `https://www.notion.so/${pageId}`;
+            } else {
+                // Generic Mission Control board URL
+                notionUrl = `https://www.notion.so/2fe419064d3081bc8155ee2719c1d365`;
+            }
+            
+            window.open(notionUrl, '_blank');
+        }
+
+        // Auto-sync every 30 seconds
+        function startBadgeSync() {
+            syncBadgesFromWorker(); // Initial sync
+            setInterval(syncBadgesFromWorker, 30000);
+        }
+
+        // Export for debugging
+        window.badgeSync = {
+            sync: syncBadgesFromWorker,
+            tasks: () => currentTasks,
+            lastSync: () => lastSyncTime
+        };
+    </script>
+
     <script>
         // Integration layer - connecting Epsilon's state system with the existing UI
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🐙 Office integrated with Epsilon State Management!');
+            
+            // Start real-time badge sync
+            startBadgeSync();
+            console.log('🎯 Real-time badge sync initialized!');
             
             // Listen to state events for enhanced UI feedback
             window.officeState.on('taskAssigned', (data) => {
