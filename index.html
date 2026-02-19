@@ -69,7 +69,7 @@
         .bookshelf {
             position: absolute;
             top: 20px;
-            left: 40%;
+            left: 50%;
             transform: translateX(-50%);
             width: 500px;
             height: 150px;
@@ -99,10 +99,10 @@
         .pool-table {
             position: absolute;
             top: 50%;
-            left: 40%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            width: 120px;
-            height: 70px;
+            width: 180px;
+            height: 100px;
             background: #1b5e20;
             border: 8px solid #5d4037;
             border-radius: 8px;
@@ -112,7 +112,7 @@
         .pool-balls {
             position: absolute;
             top: 50%;
-            left: 40%;
+            left: 50%;
             transform: translate(-50%, -50%);
             font-size: 12px;
         }
@@ -140,6 +140,37 @@
             border-radius: 4px 4px 0 0;
         }
         
+        /* Armchairs */
+        .armchair {
+            position: absolute;
+            width: 45px;
+            height: 40px;
+            background: #5d4037;
+            border-radius: 8px 8px 4px 4px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        
+        .armchair::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 8px;
+            right: 8px;
+            height: 20px;
+            background: #6d4c41;
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .armchair::after {
+            content: '🪑';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            opacity: 0.7;
+        }
+        
         /* Birdcage */
         .birdcage {
             position: absolute;
@@ -156,7 +187,7 @@
             content: '🦜';
             position: absolute;
             top: 50%;
-            left: 40%;
+            left: 50%;
             transform: translate(-50%, -50%);
             font-size: 24px;
         }
@@ -273,7 +304,7 @@
         .workstation .ticket-badge {
             position: absolute;
             top: -20px;
-            left: 40%;
+            left: 50%;
             transform: translateX(-50%);
             background: #1976d2;
             color: white;
@@ -331,7 +362,7 @@
             content: attr(data-name);
             position: absolute;
             bottom: 100%;
-            left: 40%;
+            left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.8);
             color: white;
@@ -357,7 +388,7 @@
             padding: 12px;
             border-radius: 8px;
             font-size: 11px;
-            max-width: 120px;
+            max-width: 180px;
         }
         
         .status-panel h3 {
@@ -444,7 +475,7 @@
         .door {
             position: absolute;
             bottom: 10px;
-            left: 40%;
+            left: 50%;
             transform: translateX(-50%);
             width: 50px;
             height: 80px;
@@ -742,6 +773,8 @@
         <div class="couch"></div>
         
         <!-- Armchairs -->
+        <div class="armchair" style="bottom: 200px; left: 180px;"></div>
+        <div class="armchair" style="bottom: 200px; left: 240px;"></div>
         
         <!-- Birdcage -->
         <div class="birdcage"></div>
@@ -955,16 +988,16 @@
         // Initialize
         generateBooks();
         
-        // Demo: move Alpha around occasionally
-        setInterval(() => {
-            const positions = [
-                { x: 400, y: 280 },  // pool table
-                { x: 100, y: 350 },  // couch
-                { x: 750, y: 150 },  // kitchen
-            ];
-            const pos = positions[Math.floor(Math.random() * positions.length)];
-            moveAgent('agentAlpha', pos.x, pos.y);
-        }, 5000);
+        // Demo: move Alpha around occasionally - DISABLED to prevent state conflicts
+        // setInterval(() => {
+        //     const positions = [
+        //         { x: 400, y: 280 },  // pool table
+        //         { x: 100, y: 350 },  // couch
+        //         { x: 750, y: 150 },  // kitchen
+        //     ];
+        //     const pos = positions[Math.floor(Math.random() * positions.length)];
+        //     moveAgent('agentAlpha', pos.x, pos.y);
+        // }, 5000);
         
         // Kanban Board Functionality
         let tasks = [
@@ -1034,6 +1067,10 @@
             
             columns.forEach(column => {
                 const taskList = document.getElementById(column);
+                if (!taskList) {
+                    console.error(`Kanban column not found: ${column}`);
+                    return;
+                }
                 const addBtn = taskList.querySelector('.add-task-btn');
                 
                 // Clear existing tasks (but keep add button)
@@ -1051,7 +1088,12 @@
                 });
                 
                 // Update count
-                document.getElementById(column + '-count').textContent = columnTasks.length;
+                const countElement = document.getElementById(column + '-count');
+                if (countElement) {
+                    countElement.textContent = columnTasks.length;
+                } else {
+                    console.warn(`Count element not found: ${column}-count`);
+                }
             });
         }
         
@@ -1182,12 +1224,12 @@
                 console.log(`😴→😊 Agent ${data.agentName} woke up!`);
             });
             
-            // Auto-assign tasks periodically for demo (every 20-60 seconds)
+            // Auto-assign tasks periodically for demo (every 45-75 seconds, reduced chance)
             setInterval(() => {
-                if (Math.random() < 0.3) { // 30% chance
+                if (Math.random() < 0.1) { // 10% chance (reduced from 30% to prevent conflicts)
                     window.officeState.simulateTaskAssignment();
                 }
-            }, 25000);
+            }, 60000); // Increased interval to reduce conflicts
             
             // Enhanced mail chute with state integration
             const originalSendMail = window.sendMail;

@@ -363,7 +363,13 @@ class OfficeStateManager {
             floatingAgent.className = 'floating-agent';
             floatingAgent.innerHTML = agent.icon;
             floatingAgent.setAttribute('data-name', agentName);
-            document.querySelector('.office-container').appendChild(floatingAgent);
+            const officeContainer = document.querySelector('.office-container');
+            if (officeContainer) {
+                officeContainer.appendChild(floatingAgent);
+            } else {
+                console.error('🐙 Office container not found!');
+                return;
+            }
         }
         
         const currentLocation = this.locations[agent.location];
