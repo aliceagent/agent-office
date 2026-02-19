@@ -1058,8 +1058,41 @@
         // Mission Control Database ID: 2fe419064d3081bc8155ee2719c1d365
         const NOTION_DATABASE_ID = '2fe419064d3081bc8155ee2719c1d365';
         
-        // Map task IDs to Notion page IDs (populated dynamically or from state)
-        const taskNotionPageIds = {};
+        // Map task IDs to Notion page IDs
+        const taskNotionPageIds = {
+            'OFFICE-1-1': '30c419064d30817387120f7b046294393',
+            'OFFICE-1-2': '30c419064d3081df845cd8a63699f65a',
+            'OFFICE-1-3': '30c419064d3081c3bbded3253ba37c12',
+            'OFFICE-1-4': '30c419064d30815fb66ae5000d88ca39',
+            'OFFICE-2-1': '30c419064d30817c89e1db485c20a05e',
+            'OFFICE-2-2': '30c419064d3081aabc7ef096b269ba0f',
+            'OFFICE-2-3': '30c419064d308115bbaed06b7fbb64ce',
+            'OFFICE-2-4': '30c419064d3081e18eadd0a495bde278',
+            'OFFICE-3-1': '30c419064d30814c954bdc9587acc0b9',
+            'OFFICE-3-2': '30c419064d30819db0bcd58a36caa244',
+            'OFFICE-3-3': '30c419064d3081c68361cadcdf044211',
+            'OFFICE-3-4': '30c419064d30816a9e4eea4545fbf237',
+            'OFFICE-4-1': '30c419064d3081b2866dfd98adc25c36',
+            'OFFICE-4-2': '30c419064d3081538fcbe5ce97f46606',
+            'OFFICE-4-3': '30c419064d30817f860df1d07b54c0ad',
+            'OFFICE-4-4': '30c419064d30817a901de067fe1c92e9',
+            'OFFICE-5-1': '30c419064d30818c9c9ec4cd6af4a890',
+            'OFFICE-5-2': '30c419064d3081b8a47cc1d386c50dae',
+            'OFFICE-5-3': '30c419064d30813c8571e6ce5c808701',
+            'OFFICE-5-4': '30c419064d3081a59387c12f555ffe38',
+            'OFFICE-6-1': '30c419064d30817d8901ea80f0b91833',
+            'OFFICE-6-2': '30c419064d3081f9a428d6e30b377cd0',
+            'OFFICE-6-3': '30c419064d30814798d9d838a06645fd',
+            'OFFICE-6-4': '30c419064d3081258943c1a223b58231',
+            'OFFICE-7-1': '30c419064d308112baedcb412dc5a96b',
+            'OFFICE-7-2': '30c419064d3081fcb54ed0ead4d30290',
+            'OFFICE-7-3': '30c419064d3081fea957d7d491e8e4de',
+            'OFFICE-7-4': '30c419064d3081d8ae23f0912b892fae',
+            'OFFICE-8-1': '30c419064d3081ecbdfaf24bba86e99e',
+            'OFFICE-8-2': '30c419064d3081d08c52d4832a37ccb2',
+            'OFFICE-8-3': '30c419064d3081e3992bc59827a6c8e4',
+            'OFFICE-8-4': '30c419064d30811b84a7d7f94bd171fc'
+        };
         
         function openNotionTask(element, event) {
             event.stopPropagation(); // Prevent workstation click
@@ -1072,18 +1105,17 @@
             
             let notionUrl;
             if (pageId) {
-                // Open specific task page
-                notionUrl = `https://notion.so/${pageId.replace(/-/g, '')}`;
+                // Open specific task page directly
+                notionUrl = `https://notion.so/${pageId}`;
             } else {
-                // Open Mission Control board - it will show all tasks
-                // User can find the task by ID there
+                // Fallback: Open Mission Control board
                 notionUrl = `https://notion.so/${NOTION_DATABASE_ID}`;
             }
             
             window.open(notionUrl, '_blank');
         }
         
-        // Register a Notion page ID for a task
+        // Register a Notion page ID for a task (for dynamic updates)
         function registerNotionTask(taskId, notionPageId) {
             taskNotionPageIds[taskId] = notionPageId;
         }
