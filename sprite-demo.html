@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Sprites Demo - 32x32 Pixel Art</title>
+    <link rel="stylesheet" href="sprites/agent-sprites.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #c9a66b 0%, #e8dfd0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        
+        .demo-container {
+            background: #37474f;
+            border-radius: 16px;
+            box-shadow: 
+                0 32px 64px rgba(0,0,0,0.2),
+                0 16px 32px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+            padding: 40px;
+            width: 100%;
+            max-width: 800px;
+            color: #e8dfd0;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .demo-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(45deg, #66bb6a, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .demo-subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+        
+        .sprite-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .agent-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .agent-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .sprite-display {
+            margin-bottom: 16px;
+            position: relative;
+        }
+        
+        .agent-sprite {
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .agent-info h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #e8dfd0;
+        }
+        
+        .agent-role {
+            font-size: 14px;
+            color: rgba(232, 223, 208, 0.7);
+            font-style: italic;
+        }
+        
+        .status-demo {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        
+        .status-demo .agent-sprite-container {
+            position: relative;
+        }
+        
+        .status-label {
+            font-size: 10px;
+            color: rgba(232, 223, 208, 0.6);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #42a5f5;
+        }
+        
+        .animation-demo {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .animation-item {
+            text-align: center;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            min-width: 120px;
+        }
+        
+        .animation-item h4 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #e8dfd0;
+        }
+        
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        .color-item {
+            text-align: center;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        
+        .color-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            margin: 0 auto 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .usage-examples {
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .code-example {
+            background: #2c2c2c;
+            color: #f8f8f2;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin-top: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .sprite-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .demo-container {
+                padding: 20px;
+            }
+            
+            .demo-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1 class="demo-title">Agent Sprite Collection</h1>
+            <p class="demo-subtitle">32x32 Pixel Perfect Avatars for Office View</p>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">All Agents</h2>
+            <div class="sprite-grid">
+                <div class="agent-card">
+                    <div class="sprite-display">
+                        <div class="agent-sprite alice"></div>
+                    </div>
+                    <div class="agent-info">
+                        <h3>🦜 Alice</h3>
+                        <p class="agent-role">Main Coordinator</p>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="sprite-display">
+                        <div class="agent-sprite alpha"></div>
+                    </div>
+                    <div class="agent-info">
+                        <h3>🐺 Alpha</h3>
+                        <p class="agent-role">Development Lead</p>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="sprite-display">
+                        <div class="agent-sprite beta"></div>
+                    </div>
+                    <div class="agent-info">
+                        <h3>🦊 Beta</h3>
+                        <p class="agent-role">Testing Specialist</p>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="sprite-display">
+                        <div class="agent-sprite gamma"></div>
+                    </div>
+                    <div class="agent-info">
+                        <h3>🦔 Gamma</h3>
+                        <p class="agent-role">Security Expert</p>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="sprite-display">
+                        <div class="agent-sprite delta"></div>
+                    </div>
+                    <div class="agent-info">
+                        <h3>🦉 Delta</h3>
+                        <p class="agent-role">Data Analyst</p>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="sprite-display">
+                        <div class="agent-sprite epsilon"></div>
+                    </div>
+                    <div class="agent-info">
+                        <h3>🐙 Epsilon</h3>
+                        <p class="agent-role">DevOps Engineer</p>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="sprite-display">
+                        <div class="agent-sprite zeta"></div>
+                    </div>
+                    <div class="agent-info">
+                        <h3>🦄 Zeta</h3>
+                        <p class="agent-role">Product Designer</p>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="sprite-display">
+                        <div class="agent-sprite eta"></div>
+                    </div>
+                    <div class="agent-info">
+                        <h3>🐼 Eta</h3>
+                        <p class="agent-role">Content Creator</p>
+                    </div>
+                </div>
+                
+                <div class="agent-card">
+                    <div class="sprite-display">
+                        <div class="agent-sprite theta"></div>
+                    </div>
+                    <div class="agent-info">
+                        <h3>🦝 Theta</h3>
+                        <p class="agent-role">Quality Assurance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">Animation States</h2>
+            <div class="animation-demo">
+                <div class="animation-item">
+                    <h4>Default</h4>
+                    <div class="agent-sprite zeta"></div>
+                </div>
+                <div class="animation-item">
+                    <h4>Working</h4>
+                    <div class="agent-sprite zeta working"></div>
+                </div>
+                <div class="animation-item">
+                    <h4>Sleeping</h4>
+                    <div class="agent-sprite gamma sleeping"></div>
+                </div>
+                <div class="animation-item">
+                    <h4>With Status</h4>
+                    <div class="agent-sprite-container">
+                        <div class="agent-sprite alice"></div>
+                        <div class="status-indicator online"></div>
+                    </div>
+                    <div class="status-label">Online</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">Office Color Palette</h2>
+            <div class="color-palette">
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #c9a66b;"></div>
+                    <div>Floor</div>
+                    <div style="opacity: 0.7;">#c9a66b</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #e8dfd0;"></div>
+                    <div>Wall</div>
+                    <div style="opacity: 0.7;">#e8dfd0</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #37474f;"></div>
+                    <div>Kanban Board</div>
+                    <div style="opacity: 0.7;">#37474f</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #42a5f5;"></div>
+                    <div>In Progress</div>
+                    <div style="opacity: 0.7;">#42a5f5</div>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #66bb6a;"></div>
+                    <div>Done</div>
+                    <div style="opacity: 0.7;">#66bb6a</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <div class="usage-examples">
+                <h2 class="section-title">Usage Examples</h2>
+                <p style="margin-bottom: 16px; opacity: 0.8;">Include the sprite CSS and use these classes:</p>
+                
+                <div class="code-example">
+&lt;!-- Basic sprite --&gt;
+&lt;div class="agent-sprite zeta"&gt;&lt;/div&gt;
+
+&lt;!-- With working animation --&gt;
+&lt;div class="agent-sprite alice working"&gt;&lt;/div&gt;
+
+&lt;!-- With status indicator --&gt;
+&lt;div class="agent-sprite-container"&gt;
+    &lt;div class="agent-sprite beta"&gt;&lt;/div&gt;
+    &lt;div class="status-indicator online"&gt;&lt;/div&gt;
+&lt;/div&gt;
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Add some interactive effects
+        document.querySelectorAll('.agent-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const sprite = this.querySelector('.agent-sprite');
+                sprite.style.transform = 'scale(1.2) rotate(5deg)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                const sprite = this.querySelector('.agent-sprite');
+                sprite.style.transform = '';
+            });
+        });
+    </script>
+</body>
+</html>
