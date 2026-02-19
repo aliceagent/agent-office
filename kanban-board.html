@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful Kanban Board - Office Style</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: linear-gradient(135deg, #e8dfd0 0%, #f0e8db 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .kanban-container {
+            background: #37474f;
+            border-radius: 16px;
+            box-shadow: 
+                0 32px 64px rgba(0,0,0,0.12),
+                0 16px 32px rgba(0,0,0,0.08),
+                0 4px 16px rgba(0,0,0,0.06),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+            padding: 24px;
+            width: 100%;
+            max-width: 1200px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Subtle texture overlay */
+        .kanban-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><g fill="none"><g fill="rgba(255,255,255,0.01)"><path d="M6 6h48v48H6z"/></g></g></svg>');
+            pointer-events: none;
+        }
+        
+        .kanban-header {
+            color: #e8dfd0;
+            text-align: center;
+            margin-bottom: 32px;
+            position: relative;
+        }
+        
+        .kanban-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .kanban-subtitle {
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0.8;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        .columns-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            position: relative;
+        }
+        
+        .column {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .column:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        
+        .column-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .column-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #e8dfd0;
+            letter-spacing: -0.3px;
+        }
+        
+        .column-badge {
+            background: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.9);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+        }
+        
+        .column.todo .column-title::before {
+            content: '📋';
+            font-size: 18px;
+        }
+        
+        .column.in-progress .column-title::before {
+            content: '⚡';
+            font-size: 18px;
+        }
+        
+        .column.done .column-title::before {
+            content: '✅';
+            font-size: 18px;
+        }
+        
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 120px;
+        }
+        
+        .task-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 
+                0 4px 12px rgba(0,0,0,0.08),
+                0 2px 6px rgba(0,0,0,0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .task-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #42a5f5, #1e88e5);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .task-card.in-progress::before {
+            background: linear-gradient(90deg, #42a5f5, #1e88e5);
+            opacity: 1;
+        }
+        
+        .task-card.done::before {
+            background: linear-gradient(90deg, #66bb6a, #4caf50);
+            opacity: 1;
+        }
+        
+        .task-card.high-priority::before {
+            background: linear-gradient(90deg, #ef5350, #f44336);
+            opacity: 1;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 12px 28px rgba(0,0,0,0.12),
+                0 6px 16px rgba(0,0,0,0.08);
+        }
+        
+        .task-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .task-id {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            background: #f5f5f5;
+            padding: 4px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+        
+        .priority-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .priority-high {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .priority-medium {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        
+        .priority-low {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .task-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .task-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        
+        .task-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .agent-avatar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            border: 2px solid rgba(255,255,255,0.8);
+        }
+        
+        .avatar.alice { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+        .avatar.alpha { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+        .avatar.beta { background: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%); }
+        .avatar.gamma { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+        .avatar.delta { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+        .avatar.epsilon { background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%); }
+        .avatar.zeta { background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); }
+        .avatar.eta { background: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%); }
+        .avatar.theta { background: linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%); }
+        
+        .agent-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .task-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            font-size: 10px;
+            font-weight: 500;
+            padding: 3px 8px;
+            border-radius: 8px;
+            background: #f0f0f0;
+            color: #666;
+            letter-spacing: 0.3px;
+        }
+        
+        .tag.design { background: #e3f2fd; color: #1565c0; }
+        .tag.development { background: #e8f5e8; color: #2e7d32; }
+        .tag.testing { background: #fff3e0; color: #ef6c00; }
+        .tag.review { background: #f3e5f5; color: #7b1fa2; }
+        
+        /* Column specific styles */
+        .column.in-progress {
+            border-left: 4px solid #42a5f5;
+        }
+        
+        .column.done {
+            border-left: 4px solid #66bb6a;
+        }
+        
+        .add-card-btn {
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 12px;
+            padding: 16px;
+            color: #e8dfd0;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .add-card-btn:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.5);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .columns-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .kanban-container {
+                padding: 16px;
+                margin: 10px;
+            }
+            
+            .kanban-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="kanban-container">
+        <div class="kanban-header">
+            <h1 class="kanban-title">Office Task Board</h1>
+            <p class="kanban-subtitle">Agent Mission Control</p>
+        </div>
+        
+        <div class="columns-container">
+            <!-- To Do Column -->
+            <div class="column todo">
+                <div class="column-header">
+                    <div class="column-title">To Do</div>
+                    <div class="column-badge">3</div>
+                </div>
+                <div class="cards-container">
+                    <div class="task-card">
+                        <div class="task-header">
+                            <div class="task-id">OFFICE-2-8</div>
+                            <div class="priority-indicator priority-medium">Medium</div>
+                        </div>
+                        <div class="task-title">Update Office Layout Documentation</div>
+                        <div class="task-description">Create comprehensive documentation for the new office layout including agent workstation assignments and common areas.</div>
+                        <div class="task-footer">
+                            <div class="agent-avatar">
+                                <div class="avatar eta">🐼</div>
+                                <div class="agent-name">Eta</div>
+                            </div>
+                            <div class="task-tags">
+                                <div class="tag review">documentation</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-card high-priority">
+                        <div class="task-header">
+                            <div class="task-id">OFFICE-2-9</div>
+                            <div class="priority-indicator priority-high">High</div>
+                        </div>
+                        <div class="task-title">Implement Real-time Status Updates</div>
+                        <div class="task-description">Add WebSocket connection for live agent status updates on the office view.</div>
+                        <div class="task-footer">
+                            <div class="agent-avatar">
+                                <div class="avatar theta">🦝</div>
+                                <div class="agent-name">Theta</div>
+                            </div>
+                            <div class="task-tags">
+                                <div class="tag development">backend</div>
+                                <div class="tag development">websockets</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-card">
+                        <div class="task-header">
+                            <div class="task-id">OFFICE-2-10</div>
+                            <div class="priority-indicator priority-low">Low</div>
+                        </div>
+                        <div class="task-title">Add Office Sound Effects</div>
+                        <div class="task-description">Implement ambient office sounds and interaction audio feedback for better user experience.</div>
+                        <div class="task-footer">
+                            <div class="agent-avatar">
+                                <div class="avatar epsilon">🐙</div>
+                                <div class="agent-name">Epsilon</div>
+                            </div>
+                            <div class="task-tags">
+                                <div class="tag design">audio</div>
+                                <div class="tag design">ux</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="add-card-btn">+ Add New Task</div>
+                </div>
+            </div>
+            
+            <!-- In Progress Column -->
+            <div class="column in-progress">
+                <div class="column-header">
+                    <div class="column-title">In Progress</div>
+                    <div class="column-badge">4</div>
+                </div>
+                <div class="cards-container">
+                    <div class="task-card in-progress">
+                        <div class="task-header">
+                            <div class="task-id">OFFICE-1-4</div>
+                            <div class="priority-indicator priority-high">High</div>
+                        </div>
+                        <div class="task-title">Design Kanban Board Visual Style</div>
+                        <div class="task-description">Create beautiful Kanban board with office color scheme, shadows, and typography.</div>
+                        <div class="task-footer">
+                            <div class="agent-avatar">
+                                <div class="avatar zeta">🦄</div>
+                                <div class="agent-name">Zeta</div>
+                            </div>
+                            <div class="task-tags">
+                                <div class="tag design">ui-design</div>
+                                <div class="tag design">css</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-card in-progress">
+                        <div class="task-header">
+                            <div class="task-id">OFFICE-1-5</div>
+                            <div class="priority-indicator priority-high">High</div>
+                        </div>
+                        <div class="task-title">Create Task Card Components</div>
+                        <div class="task-description">Design task cards with rounded corners, priority indicators, and agent avatars.</div>
+                        <div class="task-footer">
+                            <div class="agent-avatar">
+                                <div class="avatar zeta">🦄</div>
+                                <div class="agent-name">Zeta</div>
+                            </div>
+                            <div class="task-tags">
+                                <div class="tag design">components</div>
+                                <div class="tag design">cards</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-card in-progress">
+                        <div class="task-header">
+                            <div class="task-id">OFFICE-2-6</div>
+                            <div class="priority-indicator priority-medium">Medium</div>
+                        </div>
+                        <div class="task-title">Create Agent Portrait Sprites</div>
+                        <div class="task-description">Generate 32x32 pixel sprite versions of all agent portraits for office view.</div>
+                        <div class="task-footer">
+                            <div class="agent-avatar">
+                                <div class="avatar zeta">🦄</div>
+                                <div class="agent-name">Zeta</div>
+                            </div>
+                            <div class="task-tags">
+                                <div class="tag design">sprites</div>
+                                <div class="tag design">graphics</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-card in-progress">
+                        <div class="task-header">
+                            <div class="task-id">OFFICE-1-2</div>
+                            <div class="priority-indicator priority-high">High</div>
+                        </div>
+                        <div class="task-title">Implement Office Interactions</div>
+                        <div class="task-description">Add interactive elements like workstation clicking and agent movement controls.</div>
+                        <div class="task-footer">
+                            <div class="agent-avatar">
+                                <div class="avatar alpha">🐺</div>
+                                <div class="agent-name">Alpha</div>
+                            </div>
+                            <div class="task-tags">
+                                <div class="tag development">javascript</div>
+                                <div class="tag development">interactions</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Done Column -->
+            <div class="column done">
+                <div class="column-header">
+                    <div class="column-title">Done</div>
+                    <div class="column-badge">2</div>
+                </div>
+                <div class="cards-container">
+                    <div class="task-card done">
+                        <div class="task-header">
+                            <div class="task-id">OFFICE-1-1</div>
+                            <div class="priority-indicator priority-high">High</div>
+                        </div>
+                        <div class="task-title">Create Office Base Layout</div>
+                        <div class="task-description">Design and implement the main office view with furniture, workstations, and basic styling.</div>
+                        <div class="task-footer">
+                            <div class="agent-avatar">
+                                <div class="avatar alice">🦜</div>
+                                <div class="agent-name">Alice</div>
+                            </div>
+                            <div class="task-tags">
+                                <div class="tag design">layout</div>
+                                <div class="tag development">html</div>
+                                <div class="tag development">css</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-card done">
+                        <div class="task-header">
+                            <div class="task-id">OFFICE-2-7</div>
+                            <div class="priority-indicator priority-medium">Medium</div>
+                        </div>
+                        <div class="task-title">Setup Git Repository</div>
+                        <div class="task-description">Initialize git repository for office canvas project and configure version control.</div>
+                        <div class="task-footer">
+                            <div class="agent-avatar">
+                                <div class="avatar alice">🦜</div>
+                                <div class="agent-name">Alice</div>
+                            </div>
+                            <div class="task-tags">
+                                <div class="tag development">git</div>
+                                <div class="tag development">setup</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Add some interactive functionality
+        document.querySelectorAll('.task-card').forEach(card => {
+            card.addEventListener('click', function() {
+                console.log('Task clicked:', this.querySelector('.task-id').textContent);
+            });
+        });
+        
+        document.querySelector('.add-card-btn').addEventListener('click', function() {
+            console.log('Add new task clicked');
+        });
+    </script>
+</body>
+</html>

@@ -1190,5 +1190,96 @@
             }
         });
     </script>
+    
+    <!-- 🐙 EPSILON'S STATE MANAGEMENT SYSTEM -->
+    <script src="office-state.js"></script>
+    
+    <script>
+        // Integration layer - connecting Epsilon's state system with the existing UI
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🐙 Office integrated with Epsilon State Management!');
+            
+            // Listen to state events for enhanced UI feedback
+            window.officeState.on('taskAssigned', (data) => {
+                console.log(`🎯 Task ${data.taskId} assigned to ${data.agentName}`);
+                // Could trigger confetti or other celebration effects
+            });
+            
+            window.officeState.on('taskCompleted', (data) => {
+                console.log(`✅ Task ${data.taskId} completed by ${data.agentName}`);
+                // Trigger mail chute animation
+                sendMail();
+            });
+            
+            window.officeState.on('agentWoke', (data) => {
+                console.log(`😴→😊 Agent ${data.agentName} woke up!`);
+            });
+            
+            // Auto-assign tasks periodically for demo (every 20-60 seconds)
+            setInterval(() => {
+                if (Math.random() < 0.3) { // 30% chance
+                    window.officeState.simulateTaskAssignment();
+                }
+            }, 25000);
+            
+            // Enhanced mail chute with state integration
+            const originalSendMail = window.sendMail;
+            window.sendMail = function() {
+                originalSendMail();
+                console.log('📬 Message sent through Epsilon-enhanced mail chute!');
+            };
+        });
+        
+        // Epsilon's sequence diagram printer (because I love complexity!)
+        function printSequenceDiagram() {
+            console.log(`
+🐙 EPSILON'S OFFICE WORKFLOW SEQUENCE DIAGRAM:
+
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   TASK      │    │   AGENT     │    │   KANBAN    │    │   MESSAGE   │
+│ ASSIGNMENT  │    │  LIFECYCLE  │    │   BOARD     │    │   SYSTEM    │
+└──────┬──────┘    └──────┬──────┘    └──────┬──────┘    └──────┬──────┘
+       │                  │                  │                  │
+       │ assignTask()     │                  │                  │
+       ├─────────────────▶│                  │                  │
+       │                  │ wakeAgent()      │                  │
+       │                  ├─────────────────▶│                  │
+       │                  │                  │ moveToBoard()    │
+       │                  │                  ├─────────────────▶│
+       │                  │                  │                  │
+       │                  │ claimTask()      │                  │
+       │                  ├─────────────────▶│                  │
+       │                  │                  │                  │
+       │                  │ moveToDesk()     │                  │
+       │                  ├─────────────────▶│                  │
+       │                  │                  │                  │
+       │                  │ startWorking()   │                  │
+       │                  ├─────────────────▶│                  │
+       │                  │                  │                  │
+       │                  │   ... work ...   │                  │
+       │                  │                  │                  │
+       │                  │ completeTask()   │                  │
+       │                  ├─────────────────▶│                  │
+       │                  │                  │ sendMessage()    │
+       │                  │                  ├─────────────────▶│
+       │                  │                  │                  │
+       │                  │ returnToSleep()  │                  │
+       │                  ├─────────────────▶│                  │
+       │                  │                  │                  │
+       
+🐙 Each step involves state transitions, UI updates, animations, 
+   event emissions, and persistent storage. TENTACLES EVERYWHERE!
+            `);
+        }
+        
+        // Add to debug interface
+        window.epsilon.sequenceDiagram = printSequenceDiagram;
+        
+        console.log('🐙 Integration complete! Try these commands:');
+        console.log('  epsilon.simulate() - Assign a random task');
+        console.log('  epsilon.getState() - View full system state');
+        console.log('  epsilon.sequenceDiagram() - View workflow diagram');
+        console.log('  epsilon.tentacles - See my beautiful tentacles!');
+    </script>
 </body>
 </html>
