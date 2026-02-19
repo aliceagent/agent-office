@@ -1198,10 +1198,46 @@
             .workstation {
                 width: 52px !important;
                 height: 45px !important;
+                position: relative !important;
             }
             
             .workstation:not(.working) {
                 display: none !important;
+            }
+            
+            .workstation.working {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background: #a1887f !important;
+                border-radius: 4px !important;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+            }
+            
+            .workstation .agent-icon {
+                font-size: 20px !important;
+            }
+            
+            .workstation .ticket-badge {
+                display: block !important;
+                position: absolute !important;
+                top: -14px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                background: #1976d2 !important;
+                color: white !important;
+                font-size: 6px !important;
+                padding: 2px 4px !important;
+                border-radius: 3px !important;
+                white-space: nowrap !important;
+                z-index: 100 !important;
+            }
+            
+            .workstation .agent-name {
+                display: block !important;
+                font-size: 6px !important;
+                color: #333 !important;
             }
             
             /* BEDS - LEFT SIDE */
