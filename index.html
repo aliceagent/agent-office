@@ -3019,13 +3019,17 @@
         function startBadgeSync() {
             syncBadgesFromWorker(); // Initial sync
             setInterval(syncBadgesFromWorker, 30000);
+            
+            // Update debug panel every 5 seconds
+            setInterval(updateDebugPanel, 5000);
         }
 
         // Update debug panel
         function updateDebugPanel() {
-            document.getElementById('debugLog').innerHTML = 'System running...';
+            const now = new Date().toLocaleTimeString();
+            document.getElementById('debugLog').innerHTML = `System running at ${now}`;
             document.getElementById('syncStatus').innerHTML = `Sync: ${lastSyncTime ? new Date(lastSyncTime).toLocaleTimeString() : 'Never'}`;
-            document.getElementById('taskCount').innerHTML = `Tasks: ${currentTasks.length}`;
+            document.getElementById('taskCount').innerHTML = `Tasks: ${currentTasks ? currentTasks.length : 0}`;
             
             const workingAgents = [];
             document.querySelectorAll('.workstation.working').forEach(ws => {
@@ -3034,14 +3038,40 @@
                 if (taskBadge) workingAgents.push(`${agentName}(${taskBadge})`);
             });
             document.getElementById('workingAgents').innerHTML = `Working: ${workingAgents.length > 0 ? workingAgents.join(', ') : 'None'}`;
+            
+            // Show bed states 
+            const sleepingAgents = [];
+            document.querySelectorAll('.cot:not(.working)').forEach(bed => {
+                const agentName = bed.getAttribute('data-agent');
+                if (agentName) sleepingAgents.push(agentName);
+            });
+            
+            if (sleepingAgents.length > 0) {
+                document.getElementById('workingAgents').innerHTML += `<br>Sleeping: ${sleepingAgents.join(', ')}`;
+            }
         }
+
+        // Manual test function
+        window.testSync = function() {
+            console.log('🧪 Manual test sync with GAMMA-LIVE-TEST and EPSILON-QA-FIX');
+            const testTasks = [
+                { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' },
+                { taskId: 'GAMMA-LIVE-TEST', assignee: 'gamma', status: 'In Progress', url: 'https://notion.so/gamma-test' },
+                { taskId: 'EPSILON-QA-FIX', assignee: 'epsilon', status: 'In Progress', url: 'https://notion.so/epsilon-qa' }
+            ];
+            currentTasks = testTasks;
+            updateAgentBadges(testTasks);
+            updateDebugPanel();
+            return testTasks;
+        };
 
         // Export for debugging
         window.badgeSync = {
             sync: syncBadgesFromWorker,
             tasks: () => currentTasks,
             lastSync: () => lastSyncTime,
-            updateDebug: updateDebugPanel
+            updateDebug: updateDebugPanel,
+            test: window.testSync
         };
     </script>
 
