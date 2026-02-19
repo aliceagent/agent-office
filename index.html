@@ -35,7 +35,7 @@
             container-type: inline-size;
         }
         
-        /* Mobile portrait - fill the screen */
+        /* Mobile portrait - clean profile display */
         @media (max-width: 480px) and (orientation: portrait) {
             body {
                 padding: 0;
@@ -51,135 +51,93 @@
                 box-shadow: none;
             }
             
-            /* Smaller bookshelf at top */
+            /* HIDE all overlapping UI elements for clean display */
+            .status-panel,
+            .cots-area,
+            .cot,
+            .trophy-case,
+            .trophy-button,
+            .sound-toggle,
+            .mail-chute,
+            .kitchen,
+            .activity-feed,
+            .portraits-gallery,
+            .kanban-board,
+            .kanban-modal,
+            .armchair,
+            .couch,
+            .door,
+            .window,
+            .floating-agent,
+            .ticket-badge,
+            .agent-name {
+                display: none !important;
+            }
+            
+            /* Bookshelf - centered at top */
             .bookshelf {
-                top: 5px;
-                width: 70%;
-                height: 80px;
-                padding: 4px;
-            }
-            
-            .portraits-gallery {
-                top: 2px;
-                gap: 4px;
-            }
-            
-            .portrait {
-                width: 22px;
-                height: 22px;
-                font-size: 11px;
-            }
-            
-            /* Status panel - compact, bottom left */
-            .status-panel {
-                top: auto;
-                bottom: 80px;
-                left: 5px;
-                padding: 8px;
-                font-size: 9px;
-                max-width: 120px;
-            }
-            
-            .status-panel h3 {
-                font-size: 10px;
-                margin-bottom: 4px;
-            }
-            
-            /* Pool table - center of floor area */
-            .pool-table {
-                top: 45%;
+                top: 8%;
                 left: 50%;
-                width: 120px;
-                height: 70px;
+                transform: translateX(-50%);
+                width: 85%;
+                max-width: 350px;
+                height: 90px;
+                padding: 6px;
             }
             
-            /* Cots - right side, spaced out */
-            .cots-area {
-                top: 100px;
-                right: 5px;
-                gap: 5px;
-            }
-            
-            .cot {
-                width: 50px;
-                height: 18px;
-            }
-            
-            /* Birdcage - bottom right, above workstations */
-            .birdcage {
-                bottom: 85px;
-                right: 10px;
-                width: 40px;
-                height: 55px;
-            }
-            
-            /* Mail chute - left side */
-            .mail-chute {
-                bottom: 85px;
-                right: auto;
-                left: 10px;
-                width: 45px;
+            /* Pool table - centered */
+            .pool-table {
+                top: 40%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 140px;
                 height: 80px;
             }
             
-            /* Trophy - top right */
-            .trophy-case, .trophy-button {
-                top: 5px;
-                right: 5px;
-                width: 45px;
-                height: 45px;
+            /* Birdcage - centered below pool table */
+            .birdcage {
+                bottom: 30%;
+                left: 50%;
+                transform: translateX(-50%);
+                right: auto;
+                width: 55px;
+                height: 75px;
             }
             
-            /* Sound toggle */
-            .sound-toggle {
-                top: 5px;
-                right: 55px;
+            .birdcage::after {
+                font-size: 28px;
             }
             
-            /* Kitchen smaller */
-            .kitchen {
-                top: 90px;
-                right: 60px;
-                width: 60px;
-                height: 50px;
-            }
-            
-            /* Plants repositioned */
+            /* Plants - show in corners */
             .plant {
-                display: none;
+                display: block;
+                font-size: 24px;
             }
             
-            /* Workstations - full width, smaller */
+            /* Workstations - centered at bottom */
             .workstation-row {
-                bottom: 5px;
-                left: 5px;
-                right: 5px;
-                gap: 3px;
+                position: absolute;
+                bottom: 6%;
+                left: 50%;
+                transform: translateX(-50%);
+                gap: 6px;
                 justify-content: center;
             }
             
             .workstation {
-                width: 42px;
-                height: 38px;
+                width: 40px;
+                height: 36px;
             }
             
             .workstation .agent-icon {
-                font-size: 16px;
+                font-size: 18px;
             }
             
-            .workstation .agent-name {
-                font-size: 6px;
-            }
-            
-            .workstation .ticket-badge {
-                font-size: 6px;
-                padding: 1px 3px;
-                top: -15px;
-            }
-            
-            /* Activity feed - hide on mobile for now */
-            .activity-feed {
-                display: none;
+            .status-dot {
+                width: 7px;
+                height: 7px;
+                top: 2px;
+                right: 2px;
             }
         }
         
