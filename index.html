@@ -65,14 +65,72 @@
             background: linear-gradient(180deg, #e8dfd0 0%, #ddd5c5 100%);
         }
         
+        /* Agent Portraits Gallery */
+        .portraits-gallery {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .portrait {
+            width: 28px;
+            height: 28px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            border: 2px solid #5d4037;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        
+        .portrait:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 20;
+        }
+        
+        .portrait:hover::after {
+            content: attr(data-name);
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+        
+        .portrait.working {
+            border-color: #4caf50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+        }
+        
+        .portrait.sleeping {
+            opacity: 0.5;
+            filter: grayscale(30%);
+        }
+        
         /* Bookshelf */
         .bookshelf {
             position: absolute;
-            top: 20px;
+            top: 40px;
             left: 50%;
             transform: translateX(-50%);
             width: 500px;
-            height: 150px;
+            height: 130px;
             background: #5d4037;
             border-radius: 4px;
             display: flex;
@@ -760,6 +818,19 @@
         <!-- Kanban Board Access -->
         <div class="kanban-board" onclick="openKanban()" title="Open Kanban Board">
             📋
+        </div>
+        
+        <!-- Agent Portraits Gallery -->
+        <div class="portraits-gallery">
+            <div class="portrait working" data-name="Alice" data-agent="alice">🦜</div>
+            <div class="portrait working" data-name="Alpha" data-agent="alpha">🐺</div>
+            <div class="portrait" data-name="Beta" data-agent="beta">🦊</div>
+            <div class="portrait sleeping" data-name="Gamma" data-agent="gamma">🦔</div>
+            <div class="portrait sleeping" data-name="Delta" data-agent="delta">🦉</div>
+            <div class="portrait" data-name="Epsilon" data-agent="epsilon">🐙</div>
+            <div class="portrait working" data-name="Zeta" data-agent="zeta">🦄</div>
+            <div class="portrait" data-name="Eta" data-agent="eta">🐼</div>
+            <div class="portrait" data-name="Theta" data-agent="theta">🦝</div>
         </div>
         
         <!-- Bookshelf -->
