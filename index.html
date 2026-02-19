@@ -301,6 +301,32 @@
             box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
         }
         
+        .workstation .ticket-badge {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1976d2;
+            color: white;
+            font-size: 8px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            animation: ticketFloat 2s ease-in-out infinite;
+            display: none;
+        }
+        
+        .workstation.working .ticket-badge {
+            display: block;
+        }
+        
+        @keyframes ticketFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-3px); }
+        }
+        
         .agent-icon {
             font-size: 20px;
         }
@@ -563,46 +589,55 @@
         <!-- Workstations -->
         <div class="workstation-row">
             <div class="workstation working" data-agent="alice">
+                <div class="ticket-badge">OFFICE-1-1</div>
                 <div class="status-dot working"></div>
                 <span class="agent-icon">🦜</span>
                 <span class="agent-name">Alice</span>
             </div>
-            <div class="workstation" data-agent="alpha">
-                <div class="status-dot idle"></div>
+            <div class="workstation working" data-agent="alpha">
+                <div class="ticket-badge">OFFICE-1-2</div>
+                <div class="status-dot working"></div>
                 <span class="agent-icon">🐺</span>
                 <span class="agent-name">Alpha</span>
             </div>
             <div class="workstation" data-agent="beta">
+                <div class="ticket-badge"></div>
                 <div class="status-dot"></div>
                 <span class="agent-icon">🦊</span>
                 <span class="agent-name">Beta</span>
             </div>
             <div class="workstation" data-agent="gamma">
+                <div class="ticket-badge"></div>
                 <div class="status-dot"></div>
                 <span class="agent-icon">🦔</span>
                 <span class="agent-name">Gamma</span>
             </div>
             <div class="workstation" data-agent="delta">
+                <div class="ticket-badge"></div>
                 <div class="status-dot"></div>
                 <span class="agent-icon">🦉</span>
                 <span class="agent-name">Delta</span>
             </div>
             <div class="workstation" data-agent="epsilon">
+                <div class="ticket-badge"></div>
                 <div class="status-dot"></div>
                 <span class="agent-icon">🐙</span>
                 <span class="agent-name">Epsilon</span>
             </div>
-            <div class="workstation" data-agent="zeta">
-                <div class="status-dot"></div>
+            <div class="workstation working" data-agent="zeta">
+                <div class="ticket-badge">OFFICE-1-4</div>
+                <div class="status-dot working"></div>
                 <span class="agent-icon">🦄</span>
                 <span class="agent-name">Zeta</span>
             </div>
             <div class="workstation" data-agent="eta">
+                <div class="ticket-badge"></div>
                 <div class="status-dot"></div>
-                <span class="agent-icon">🦦</span>
+                <span class="agent-icon">🐼</span>
                 <span class="agent-name">Eta</span>
             </div>
             <div class="workstation" data-agent="theta">
+                <div class="ticket-badge"></div>
                 <div class="status-dot"></div>
                 <span class="agent-icon">🦝</span>
                 <span class="agent-name">Theta</span>
