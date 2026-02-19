@@ -1169,6 +1169,42 @@
         .notion-link::before {
             content: '📝';
         }
+
+        /* Sound Controls */
+        .sound-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .sound-toggle:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+
+        .sound-toggle.muted {
+            opacity: 0.5;
+        }
+
+        /* Hide sound effects when prefers-reduced-motion */
+        @media (prefers-reduced-motion: reduce) {
+            .sound-toggle {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1209,6 +1245,11 @@
         
         <!-- Night Lamp -->
         <div class="night-lamp"></div>
+        
+        <!-- Sound Controls -->
+        <div class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="Toggle Sound Effects">
+            🔊
+        </div>
         
         <!-- Pool Table -->
         <div class="pool-table">
@@ -1540,6 +1581,107 @@
             }
         }
         
+        // Sound effects system using Web Audio API
+        class SoundSystem {
+            constructor() {
+                this.audioContext = null;
+                this.isMuted = localStorage.getItem('soundMuted') === 'true';
+                this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                this.initAudioContext();
+                this.updateToggleIcon();
+            }
+            
+            initAudioContext() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn('Web Audio API not supported');
+                }
+            }
+            
+            async resumeAudioContext() {
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    await this.audioContext.resume();
+                }
+            }
+            
+            createTone(frequency, duration, type = 'sine', volume = 0.1) {
+                if (!this.audioContext || this.isMuted || this.prefersReducedMotion) return;
+                
+                this.resumeAudioContext();
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                oscillator.type = type;
+                
+                // Envelope for smooth sound
+                gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + duration);
+            }
+            
+            playTaskComplete() {
+                // Pleasant chime - ascending arpeggio
+                const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5
+                frequencies.forEach((freq, index) => {
+                    setTimeout(() => {
+                        this.createTone(freq, 0.3, 'sine', 0.08);
+                    }, index * 150);
+                });
+            }
+            
+            playTaskAssigned() {
+                // Soft ping - gentle notification
+                this.createTone(800, 0.2, 'sine', 0.06);
+                setTimeout(() => {
+                    this.createTone(1000, 0.2, 'sine', 0.04);
+                }, 100);
+            }
+            
+            toggle() {
+                this.isMuted = !this.isMuted;
+                localStorage.setItem('soundMuted', this.isMuted.toString());
+                this.updateToggleIcon();
+                
+                // Play a test sound when unmuting
+                if (!this.isMuted && !this.prefersReducedMotion) {
+                    setTimeout(() => this.playTaskAssigned(), 100);
+                }
+            }
+            
+            updateToggleIcon() {
+                const toggle = document.getElementById('soundToggle');
+                if (toggle) {
+                    toggle.textContent = this.isMuted ? '🔇' : '🔊';
+                    toggle.classList.toggle('muted', this.isMuted);
+                }
+            }
+        }
+        
+        // Initialize sound system
+        const soundSystem = new SoundSystem();
+        
+        // Global functions for sound control
+        function toggleSound() {
+            soundSystem.toggle();
+        }
+        
+        function playTaskCompleteSound() {
+            soundSystem.playTaskComplete();
+        }
+        
+        function playTaskAssignedSound() {
+            soundSystem.playTaskAssigned();
+        }
+
         // Agent popover system
         const agentData = {
             'alice': {
@@ -1639,6 +1781,11 @@
             
             // Show popover
             popover.classList.add('show');
+            
+            // Play a subtle interaction sound
+            setTimeout(() => {
+                soundSystem.createTone(600, 0.1, 'sine', 0.03);
+            }, 50);
         }
 
         function hideAgentPopover() {
@@ -1823,7 +1970,17 @@
                 // Update task data
                 const task = tasks.find(t => t.id === taskId);
                 if (task) {
+                    const oldColumn = task.column;
                     task.column = newColumn;
+                    
+                    // Play sound effects based on column change
+                    if (newColumn === 'done' && oldColumn !== 'done') {
+                        // Task completed - pleasant chime
+                        setTimeout(() => playTaskCompleteSound(), 100);
+                    } else if (oldColumn === 'backlog' && newColumn === 'progress') {
+                        // Task assigned - soft ping
+                        setTimeout(() => playTaskAssignedSound(), 100);
+                    }
                 }
                 
                 // Move element
