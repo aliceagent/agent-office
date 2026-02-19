@@ -71,9 +71,7 @@
             .window,
             .floating-agent,
             .night-lamp,
-            .plant,
-            .pool-table,
-            .pool-balls {
+            .plant {
                 display: none !important;
             }
             
@@ -88,18 +86,33 @@
                 padding: 5px;
             }
             
-            /* Birdcage - center of room */
+            /* Birdcage - on wall in the back */
             .birdcage {
-                top: 38%;
+                top: 18%;
                 bottom: auto;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 50px;
-                height: 65px;
+                right: 10%;
+                left: auto;
+                transform: none;
+                width: 40px;
+                height: 55px;
             }
             
             .birdcage::after {
-                font-size: 26px;
+                font-size: 22px;
+            }
+            
+            /* Pool table - centered and rotated */
+            .pool-table {
+                display: block !important;
+                top: 42% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) rotate(90deg) !important;
+                width: 120px !important;
+                height: 70px !important;
+            }
+            
+            .pool-balls {
+                display: block !important;
             }
             
             /* === DESKS AREA (working agents) === */
