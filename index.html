@@ -161,11 +161,9 @@
                 border-radius: 2px !important;
             }
             
-            /* Hide non-working agents */
-            .workstation:not(.working) {
-                display: none !important;
-            }
-            
+            /* Show ALL workstations on mobile - JS handles working state */
+            .workstation,
+            .workstation:not(.working),
             .workstation.working {
                 display: flex !important;
             }
@@ -1204,10 +1202,9 @@
                 position: relative !important;
             }
             
-            .workstation:not(.working) {
-                display: none !important;
-            }
-            
+            /* Show ALL workstations - JS controls working state */
+            .workstation,
+            .workstation:not(.working),
             .workstation.working {
                 display: flex !important;
                 flex-direction: column !important;
@@ -1577,7 +1574,7 @@
                 display: none;
             }
         }
-        /* FINAL MOBILE OVERRIDE - Highest priority */
+        /* FINAL MOBILE OVERRIDE - Show ALL desks regardless of working class */
         @media screen and (max-width: 500px) {
             .workstation-row {
                 position: absolute !important;
@@ -1590,44 +1587,61 @@
                 bottom: auto !important;
                 transform: translateY(-50%) !important;
                 flex-direction: column !important;
-                gap: 8px !important;
+                gap: 5px !important;
                 z-index: 999 !important;
-                border: 3px solid red !important;
-                min-width: 60px !important;
-                min-height: 150px !important;
-                background: rgba(255,0,0,0.1) !important;
             }
             
-            /* Force ALL workstations visible for debug */
-            .workstation {
+            /* Show ALL workstations - don't hide based on working class */
+            .workstation,
+            .workstation:not(.working),
+            .workstation.working {
                 display: flex !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-                width: 50px !important;
-                height: 44px !important;
+                width: 48px !important;
+                height: 40px !important;
                 background: #8d6e63 !important;
                 border-radius: 4px !important;
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
                 position: relative !important;
-                border: 2px solid blue !important;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+            }
+            
+            /* Working desks get green glow */
+            .workstation.working {
+                box-shadow: 0 0 8px rgba(76, 175, 80, 0.6) !important;
             }
             
             .workstation .agent-icon {
-                font-size: 18px !important;
+                font-size: 16px !important;
                 display: block !important;
             }
             
-            .workstation .ticket-badge {
+            .workstation .agent-name {
+                font-size: 5px !important;
                 display: block !important;
+                color: #333 !important;
+            }
+            
+            /* Task badge above working agents */
+            .workstation .ticket-badge {
                 position: absolute !important;
                 top: -12px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
                 font-size: 5px !important;
                 background: #1976d2 !important;
                 color: white !important;
                 padding: 1px 3px !important;
                 border-radius: 2px !important;
+                white-space: nowrap !important;
+            }
+            
+            /* Empty badge hidden */
+            .workstation .ticket-badge:empty {
+                display: none !important;
             }
         }
     </style>
