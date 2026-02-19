@@ -2268,16 +2268,16 @@
                 emoji: '🦜',
                 avatar: 'avatars/alice.jpg',
                 status: 'working',
-                currentTask: 'Building Office Canvas Interface',
-                taskId: 'OFFICE-1-1'
+                currentTask: 'Chatting with J',
+                taskId: 'CHATTING'
             },
             'alpha': {
                 name: 'Worker-Alpha',
                 emoji: '🐺',
                 avatar: 'avatars/alpha.jpg',
-                status: 'working',
-                currentTask: 'Sprite System Implementation',
-                taskId: 'OFFICE-1-2'
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
             },
             'beta': {
                 name: 'Worker-Beta',
@@ -2315,9 +2315,9 @@
                 name: 'Worker-Zeta',
                 emoji: '🦄',
                 avatar: 'avatars/zeta.jpg',
-                status: 'working',
-                currentTask: 'Testing Infrastructure',
-                taskId: 'OFFICE-1-3'
+                status: 'offline',
+                currentTask: 'No active tasks',
+                taskId: null
             },
             'eta': {
                 name: 'Eta',
@@ -2789,11 +2789,11 @@
         }
 
         function useDemoData() {
-            console.log('🎭 Using demo data (Worker unavailable)');
+            console.log('🦜 Alice always at desk (no active MC tasks)');
+            // Alice is always working - she's chatting with J!
+            // Other agents sleep until they have real MC tasks
             updateAgentBadges([
-                { taskId: 'OFFICE-1-1', assignee: 'Alice', status: 'In Progress', url: 'https://notion.so/demo' },
-                { taskId: 'OFFICE-1-2', assignee: 'Worker-Alpha', status: 'In Progress', url: 'https://notion.so/demo' },
-                { taskId: 'OFFICE-1-4', assignee: 'Zeta', status: 'In Progress', url: 'https://notion.so/demo' }
+                { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' }
             ]);
         }
 
