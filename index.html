@@ -2852,7 +2852,7 @@
             console.log(`🚶‍♂️ Walker appended at (${from.x}, ${from.y})`);
             
             let currentPoint = 0;
-            const speed = 40; // pixels per frame interval (slower for casual walking)
+            const speed = 20; // pixels per frame interval (very casual stroll)
             
             function moveStep() {
                 if (currentPoint >= path.length - 1) {
@@ -3113,9 +3113,10 @@
         
         function useDemoData() {
             console.log('🦜 Using demo data (worker unavailable)');
-            // Test data - Beta's task is COMPLETE, back to sleep!
+            // Test data - Beta has task again to test slower speed
             currentTasks = [
-                { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' }
+                { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' },
+                { taskId: 'OFF-1-1', assignee: 'Beta', status: 'In Progress', url: 'https://notion.so/beta-walk-test' }
             ];
             lastSyncTime = new Date().toISOString();
             lastSyncError = 'Worker unavailable - using demo data';
