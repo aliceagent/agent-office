@@ -3113,11 +3113,10 @@
         
         function useDemoData() {
             console.log('🦜 Using demo data (worker unavailable)');
-            // Test data to show what SHOULD happen
+            // Test data - Beta now has a task!
             currentTasks = [
                 { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' },
-                { taskId: 'GAMMA-LIVE-TEST', assignee: 'Gamma', status: 'In Progress', url: 'https://notion.so/gamma-test' },
-                { taskId: 'EPSILON-QA-FIX', assignee: 'Epsilon', status: 'In Progress', url: 'https://notion.so/epsilon-qa' }
+                { taskId: 'OFF-1-1', assignee: 'Beta', status: 'In Progress', url: 'https://notion.so/beta-walk-test' }
             ];
             lastSyncTime = new Date().toISOString();
             lastSyncError = 'Worker unavailable - using demo data';
