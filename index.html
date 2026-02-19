@@ -35,7 +35,7 @@
             container-type: inline-size;
         }
         
-        /* Mobile portrait - clean profile display */
+        /* Mobile portrait - office with desks and beds */
         @media (max-width: 480px) and (orientation: portrait) {
             body {
                 padding: 0;
@@ -51,10 +51,8 @@
                 box-shadow: none;
             }
             
-            /* HIDE all overlapping UI elements for clean display */
+            /* HIDE UI clutter */
             .status-panel,
-            .cots-area,
-            .cot,
             .trophy-case,
             .trophy-button,
             .trophy-icon,
@@ -72,75 +70,177 @@
             .door,
             .window,
             .floating-agent,
-            .ticket-badge,
-            .agent-name,
-            .night-lamp {
+            .night-lamp,
+            .plant,
+            .pool-table,
+            .pool-balls {
                 display: none !important;
             }
             
-            /* Bookshelf - centered at top */
+            /* Bookshelf - top center */
             .bookshelf {
-                top: 8%;
+                top: 5%;
                 left: 50%;
                 transform: translateX(-50%);
-                width: 85%;
-                max-width: 350px;
-                height: 90px;
-                padding: 6px;
+                width: 90%;
+                max-width: 380px;
+                height: 80px;
+                padding: 5px;
             }
             
-            /* Pool table - centered and rotated */
-            .pool-table {
-                top: 40% !important;
-                left: 50% !important;
-                transform: translate(-50%, -50%) rotate(90deg) !important;
-                width: 140px !important;
-                height: 80px !important;
-            }
-            
-            /* Birdcage - centered below pool table */
+            /* Birdcage - center of room */
             .birdcage {
-                bottom: 30%;
+                top: 38%;
+                bottom: auto;
                 left: 50%;
                 transform: translateX(-50%);
-                right: auto;
-                width: 55px;
-                height: 75px;
+                width: 50px;
+                height: 65px;
             }
             
             .birdcage::after {
-                font-size: 28px;
+                font-size: 26px;
             }
             
-            /* Plants - hide for cleaner look */
-            .plant {
-                display: none !important;
-            }
-            
-            /* Workstations - centered at bottom */
+            /* === DESKS AREA (working agents) === */
             .workstation-row {
                 position: absolute;
-                bottom: 6%;
+                bottom: 25%;
                 left: 50%;
                 transform: translateX(-50%);
-                gap: 6px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
                 justify-content: center;
+                max-width: 95%;
             }
             
             .workstation {
-                width: 40px;
-                height: 36px;
+                width: 52px;
+                height: 48px;
+                background: #a1887f;
+                border-radius: 4px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-end;
+                padding-bottom: 4px;
+                position: relative;
+                box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            }
+            
+            /* Desk surface */
+            .workstation::before {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 2px;
+                right: 2px;
+                height: 12px;
+                background: #6d4c41;
+                border-radius: 2px;
+            }
+            
+            /* Hide non-working agents from desk area */
+            .workstation:not(.working) {
+                display: none !important;
             }
             
             .workstation .agent-icon {
-                font-size: 18px;
+                font-size: 22px;
+                z-index: 2;
+                margin-bottom: 8px;
+            }
+            
+            .workstation .agent-name {
+                display: block !important;
+                font-size: 7px;
+                color: #333;
+                z-index: 2;
+            }
+            
+            /* Task badge above head */
+            .workstation .ticket-badge {
+                display: block !important;
+                position: absolute;
+                top: -18px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #1976d2;
+                color: white;
+                font-size: 6px;
+                font-weight: bold;
+                padding: 2px 5px;
+                border-radius: 3px;
+                white-space: nowrap;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                z-index: 10;
             }
             
             .status-dot {
-                width: 7px;
-                height: 7px;
-                top: 2px;
-                right: 2px;
+                display: none !important;
+            }
+            
+            /* === BEDS AREA (offline agents) === */
+            .cots-area {
+                display: flex !important;
+                position: absolute;
+                bottom: 5%;
+                left: 50%;
+                transform: translateX(-50%);
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 6px;
+                justify-content: center;
+                max-width: 95%;
+            }
+            
+            .cot {
+                display: flex !important;
+                width: 48px;
+                height: 28px;
+                background: linear-gradient(180deg, #8d6e63 0%, #6d4c41 100%);
+                border-radius: 4px;
+                position: relative;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .cot::before {
+                content: '';
+                position: absolute;
+                top: 3px;
+                left: 3px;
+                right: 3px;
+                bottom: 3px;
+                background: #e8e0d5;
+                border-radius: 2px;
+            }
+            
+            .cot .pillow {
+                position: absolute;
+                top: 5px;
+                left: 5px;
+                width: 10px;
+                height: 8px;
+                background: #fff;
+                border-radius: 2px;
+                z-index: 1;
+            }
+            
+            .cot .sleeping-agent {
+                position: relative;
+                font-size: 14px;
+                z-index: 2;
+            }
+            
+            .cot .zzz {
+                position: absolute;
+                top: -8px;
+                right: 3px;
+                font-size: 8px;
+                z-index: 3;
             }
         }
         
@@ -1450,32 +1550,37 @@
             <div class="mail-chute-label">TELEGRAM</div>
         </div>
         
-        <!-- Cots for sleeping agents -->
+        <!-- Cots for sleeping/offline agents -->
         <div class="cots-area">
-            <div class="cot" id="cot1">
+            <div class="cot" id="cot-beta" data-agent="beta">
                 <div class="pillow"></div>
+                <span class="sleeping-agent">🦊</span>
+                <span class="zzz">💤</span>
             </div>
-            <div class="cot" id="cot2">
-                <div class="pillow"></div>
-            </div>
-            <div class="cot" id="cot3">
+            <div class="cot" id="cot-gamma" data-agent="gamma">
                 <div class="pillow"></div>
                 <span class="sleeping-agent">🦔</span>
                 <span class="zzz">💤</span>
             </div>
-            <div class="cot" id="cot4">
-                <div class="pillow"></div>
-            </div>
-            <div class="cot" id="cot5">
+            <div class="cot" id="cot-delta" data-agent="delta">
                 <div class="pillow"></div>
                 <span class="sleeping-agent">🦉</span>
                 <span class="zzz">💤</span>
             </div>
-            <div class="cot" id="cot6">
+            <div class="cot" id="cot-epsilon" data-agent="epsilon">
                 <div class="pillow"></div>
+                <span class="sleeping-agent">🐙</span>
+                <span class="zzz">💤</span>
             </div>
-            <div class="cot" id="cot7">
+            <div class="cot" id="cot-eta" data-agent="eta">
                 <div class="pillow"></div>
+                <span class="sleeping-agent">🐼</span>
+                <span class="zzz">💤</span>
+            </div>
+            <div class="cot" id="cot-theta" data-agent="theta">
+                <div class="pillow"></div>
+                <span class="sleeping-agent">🦝</span>
+                <span class="zzz">💤</span>
             </div>
         </div>
         
