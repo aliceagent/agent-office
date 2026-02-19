@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦔 Gamma's Test Runner</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #f5f5f5;
+            padding: 20px;
+            margin: 0;
+        }
+        .header {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #c0392b;
+        }
+        .instructions {
+            background: #2c3e50;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        iframe {
+            width: 100%;
+            height: 70vh;
+            border: 2px solid #34495e;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🦔 Gamma's Skeptical Test Runner</h1>
+        <p><em>Testing the Office Canvas - Expecting everything to be broken</em></p>
+    </div>
+    
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>The Office Canvas is loaded below in an iframe</li>
+            <li>Open your browser's Developer Console (F12)</li>
+            <li>Click "Run Tests" to inject and execute the test suite</li>
+            <li>Watch the console for detailed test results</li>
+            <li>The tests will automatically check all functionality and report failures</li>
+        </ol>
+        <p><strong>🦔 Gamma's prediction:</strong> At least 60% of tests will fail. Prove me wrong.</p>
+    </div>
+    
+    <div class="controls">
+        <button onclick="runTests()">🚀 Run Tests</button>
+        <button onclick="openKanbanFromFrame()">📋 Open Kanban</button>
+        <button onclick="location.reload()">🔄 Refresh</button>
+    </div>
+    
+    <iframe id="officeFrame" src="index.html"></iframe>
+    
+    <script>
+        function runTests() {
+            const frame = document.getElementById('officeFrame');
+            const frameWindow = frame.contentWindow;
+            
+            console.log('🦔 Injecting test suite into Office Canvas...');
+            
+            // Inject the test script
+            const script = frameWindow.document.createElement('script');
+            script.textContent = \`
+                // The entire test suite from automated-tests.js
+                ${getTestScript()}
+            \`;
+            
+            frameWindow.document.body.appendChild(script);
+            
+            // Wait a bit then run tests
+            setTimeout(() => {
+                if (frameWindow.officeTestRunner) {
+                    console.log('🦔 Starting test execution...');
+                    frameWindow.officeTestRunner.runAllTests();
+                } else {
+                    console.error('❌ Failed to inject test runner');
+                }
+            }, 500);
+        }
+        
+        function openKanbanFromFrame() {
+            const frame = document.getElementById('officeFrame');
+            const frameWindow = frame.contentWindow;
+            
+            if (frameWindow.openKanban) {
+                frameWindow.openKanban();
+                console.log('📋 Opened Kanban board in frame');
+            } else {
+                console.error('❌ openKanban function not available');
+            }
+        }
+        
+        function getTestScript() {
+            // Return the test script content - in a real scenario, we'd load this from the file
+            // For now, return a simplified version that will be manually replaced
+            return \`
+                console.log('🦔 Test script placeholder loaded');
+                console.log('⚠️ Replace this with the actual test script content from automated-tests.js');
+                console.log('📝 Manual test mode - check the following:');
+                console.log('1. Kanban board opens with 4 columns');
+                console.log('2. Task cards display properly');
+                console.log('3. Agent workstations have icons');
+                console.log('4. Working agents show ticket badges');
+                console.log('5. Sleeping agents are in cots with 💤');
+                
+                window.manualTestMode = true;
+            \`;
+        }
+        
+        // Auto-inject simplified test when frame loads
+        document.getElementById('officeFrame').onload = function() {
+            console.log('🦔 Office Canvas loaded. Ready for testing.');
+            console.log('💡 Click "Run Tests" to start the automated test suite');
+        };
+    </script>
+</body>
+</html>
