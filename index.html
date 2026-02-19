@@ -2856,28 +2856,58 @@
         function updateAgentBadges(tasks) {
             console.log('🎯 updateAgentBadges called with tasks:', tasks);
             
-            // Build new state map
-            const newStates = {};
+            // First, clear all working states
+            document.querySelectorAll('.workstation').forEach(workstation => {
+                workstation.classList.remove('working');
+                const badge = workstation.querySelector('.ticket-badge');
+                badge.textContent = '';
+                badge.style.display = 'none';
+                const statusDot = workstation.querySelector('.status-dot');
+                statusDot.classList.remove('working');
+            });
+            
+            // Clear all bed states
+            document.querySelectorAll('.cot').forEach(bed => {
+                bed.classList.remove('working');
+            });
+            
+            // Process each task
             tasks.forEach(task => {
                 console.log(`🔍 Processing task: ${task.taskId} assigned to ${task.assignee} with status ${task.status}`);
                 if (task.assignee && task.status === 'In Progress') {
                     const agentKey = findAgentKey(task.assignee);
                     console.log(`🔍 Agent key found: ${agentKey} for assignee: ${task.assignee}`);
                     if (agentKey) {
-                        newStates[agentKey] = { working: true, taskId: task.taskId };
-                        console.log(`✅ Set ${agentKey} to working with task ${task.taskId}`);
+                        // Find the workstation for this agent
+                        const workstation = document.querySelector(`.workstation[data-agent="${agentKey}"]`);
+                        if (workstation) {
+                            console.log(`✅ Setting ${agentKey} to working at desk with task ${task.taskId}`);
+                            
+                            // Agent is working - show at desk
+                            workstation.classList.add('working');
+                            const badge = workstation.querySelector('.ticket-badge');
+                            badge.textContent = task.taskId;
+                            badge.style.display = 'block';
+                            const statusDot = workstation.querySelector('.status-dot');
+                            statusDot.classList.add('working');
+                            
+                            // Agent leaves bed when working
+                            const bed = document.querySelector(`.cot[data-agent="${agentKey}"]`);
+                            if (bed) {
+                                bed.classList.add('working');
+                                console.log(`✅ ${agentKey} left bed - now working`);
+                            }
+                        }
                     }
                 }
             });
             
-            // Always mark Alice as working
-            if (!newStates['alice']) {
-                newStates['alice'] = { working: true, taskId: 'CHATTING' };
-            }
-            
-            console.log('🏗️ New agent states:', newStates);
-            
-            // Detect state changes and animate
+            console.log('🏗️ Badge sync complete!');
+        }
+        
+        // SIMPLIFIED VERSION - REMOVED ANIMATION TO AVOID CONFLICTS
+        function updateAgentBadgesOLD(tasks) {
+            // OLD CODE KEPT FOR REFERENCE
             document.querySelectorAll('.workstation').forEach(workstation => {
                 const agentKey = workstation.getAttribute('data-agent');
                 const wasWorking = previousAgentStates[agentKey]?.working || false;
@@ -2922,11 +2952,13 @@
                     workstation.classList.add('working');
                     statusDot.classList.add('working');
                     if (bed) bed.classList.add('working');
+                    console.log(`✅ ${agentKey} set to WORKING`);
                 } else {
                     // Agent is sleeping - show in bed
                     workstation.classList.remove('working');
                     statusDot.classList.remove('working');
                     if (bed) bed.classList.remove('working');
+                    console.log(`💤 ${agentKey} set to SLEEPING`);
                 }
             });
 
