@@ -1975,17 +1975,17 @@
     </div>
     
     <!-- Debug Panel -->
-    <div id="debugPanel" style="position:fixed;bottom:60px;left:5px;right:5px;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:10px;padding:8px;border-radius:5px;max-height:180px;overflow-y:auto;z-index:9999;">
+    <div id="debugPanel" style="position:fixed;bottom:60px;left:5px;right:5px;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:10px;padding:8px;border-radius:5px;max-height:250px;overflow-y:auto;z-index:9999;">
         <div><strong>🔧 DEBUG MODE</strong></div>
+        <div style="margin:5px 0;background:#222;padding:5px;border-radius:3px;">
+            <button onclick="syncBadgesFromWorker()" style="font-size:11px;padding:4px 8px;margin-right:4px;background:#4CAF50;color:white;border:none;border-radius:3px;">🔄 Sync</button>
+            <button onclick="testWalkAnimation('beta')" style="font-size:11px;padding:4px 8px;margin-right:4px;background:#2196F3;color:white;border:none;border-radius:3px;">🦊 Beta Walk</button>
+            <button onclick="testWalkAnimation('gamma')" style="font-size:11px;padding:4px 8px;background:#FF9800;color:white;border:none;border-radius:3px;">🦔 Gamma Walk</button>
+        </div>
         <div id="debugLog">Loading...</div>
         <div id="syncStatus">Sync: Not started</div>
         <div id="taskCount">Tasks: 0</div>
         <div id="workingAgents">Working: None</div>
-        <div style="margin-top:5px;">
-            <button onclick="syncBadgesFromWorker()" style="font-size:9px;padding:2px 6px;margin-right:4px;">🔄 Force Sync</button>
-            <button onclick="testWalkAnimation('beta')" style="font-size:9px;padding:2px 6px;margin-right:4px;">🚶 Test Beta Walk</button>
-            <button onclick="testWalkAnimation('gamma')" style="font-size:9px;padding:2px 6px;">🚶 Test Gamma Walk</button>
-        </div>
     </div>
 
     <!-- Agent Popover -->
@@ -2733,21 +2733,27 @@
         let currentTasks = [];
 
         async function syncBadgesFromWorker() {
+            console.log('🔄 syncBadgesFromWorker called');
             try {
-                console.log('🔄 Syncing badges from Cloudflare Worker...');
+                console.log('🔄 Fetching from:', WORKER_ENDPOINT);
                 
                 const response = await fetch(WORKER_ENDPOINT);
+                console.log('🔄 Response status:', response.status);
+                
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const data = await response.json();
+                console.log('🔄 Data received:', data);
+                
                 if (!data.success) {
                     throw new Error(data.error || 'Worker returned error');
                 }
 
                 currentTasks = data.tasks;
                 lastSyncTime = new Date().toISOString();
+                lastSyncError = null; // Clear error on success
                 
                 updateAgentBadges(data.tasks);
                 console.log(`✅ Synced ${data.tasks.length} tasks from Mission Control`);
