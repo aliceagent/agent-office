@@ -980,6 +980,81 @@
         .armchair { z-index: 6; }
         .portraits-gallery { z-index: 15; }
         .bookshelf { z-index: 8; }
+
+        /* Time-of-day lighting system */
+        :root {
+            --ambient-light: rgba(255, 255, 255, 0);
+            --shadow-intensity: 0.4;
+            --wall-brightness: 1;
+            --floor-brightness: 1;
+        }
+
+        .office-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--ambient-light);
+            pointer-events: none;
+            transition: background 2s ease;
+            z-index: 100;
+        }
+
+        /* Lighting variations */
+        .lighting-morning {
+            --ambient-light: linear-gradient(45deg, rgba(255, 220, 150, 0.15), rgba(255, 235, 180, 0.1));
+            --wall-brightness: 1.1;
+            --floor-brightness: 1.05;
+        }
+
+        .lighting-afternoon {
+            --ambient-light: rgba(255, 255, 255, 0.02);
+            --wall-brightness: 1;
+            --floor-brightness: 1;
+        }
+
+        .lighting-evening {
+            --ambient-light: linear-gradient(135deg, rgba(255, 150, 50, 0.2), rgba(255, 100, 30, 0.15));
+            --wall-brightness: 0.9;
+            --floor-brightness: 0.85;
+        }
+
+        .lighting-night {
+            --ambient-light: linear-gradient(180deg, rgba(20, 20, 40, 0.6), rgba(10, 10, 30, 0.7));
+            --shadow-intensity: 0.8;
+            --wall-brightness: 0.3;
+            --floor-brightness: 0.25;
+        }
+
+        .wall {
+            filter: brightness(var(--wall-brightness));
+            transition: filter 2s ease;
+        }
+
+        .floor {
+            filter: brightness(var(--floor-brightness));
+            transition: filter 2s ease;
+        }
+
+        /* Soft lamp glow for night time */
+        .night-lamp {
+            position: absolute;
+            top: 60px;
+            right: 100px;
+            width: 30px;
+            height: 40px;
+            background: #fff8dc;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            opacity: 0;
+            transition: opacity 2s ease;
+            box-shadow: 0 0 30px rgba(255, 248, 220, 0.6);
+        }
+
+        .lighting-night .night-lamp {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -1017,6 +1092,9 @@
         
         <!-- Kitchen -->
         <div class="kitchen"></div>
+        
+        <!-- Night Lamp -->
+        <div class="night-lamp"></div>
         
         <!-- Pool Table -->
         <div class="pool-table">
@@ -1305,8 +1383,37 @@
             }
         }
         
+        // Time-of-day lighting system
+        function updateLighting() {
+            const now = new Date();
+            const hour = now.getHours();
+            const container = document.querySelector('.office-container');
+            
+            // Remove existing lighting classes
+            container.classList.remove('lighting-morning', 'lighting-afternoon', 'lighting-evening', 'lighting-night');
+            
+            // Apply appropriate lighting based on time
+            if (hour >= 6 && hour < 12) {
+                // Morning: warm bright light
+                container.classList.add('lighting-morning');
+            } else if (hour >= 12 && hour < 18) {
+                // Afternoon: neutral
+                container.classList.add('lighting-afternoon');
+            } else if (hour >= 18 && hour < 22) {
+                // Evening: orange/sunset tint
+                container.classList.add('lighting-evening');
+            } else {
+                // Night: dark with soft lamp glow
+                container.classList.add('lighting-night');
+            }
+        }
+        
         // Initialize
         generateBooks();
+        updateLighting();
+        
+        // Update lighting every 10 minutes
+        setInterval(updateLighting, 600000);
         
         // Demo: move Alpha around occasionally - DISABLED to prevent state conflicts
         // setInterval(() => {
