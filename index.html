@@ -121,19 +121,23 @@
             /* === DESKS AREA (working agents) === */
             .workstation-row {
                 position: absolute !important;
-                bottom: 18% !important;
+                top: auto !important;
+                bottom: 22% !important;
                 left: 50% !important;
+                right: auto !important;
                 transform: translateX(-50%) !important;
                 display: flex !important;
                 flex-direction: row !important;
                 flex-wrap: nowrap !important;
-                gap: 10px !important;
+                gap: 12px !important;
                 justify-content: center !important;
+                z-index: 20 !important;
             }
             
+            /* Show ALL workstations first, then hide non-working */
             .workstation {
-                width: 55px !important;
-                height: 50px !important;
+                width: 58px !important;
+                height: 52px !important;
                 background: #a1887f !important;
                 border-radius: 4px !important;
                 display: flex !important;
@@ -152,8 +156,8 @@
                 bottom: 0 !important;
                 left: 2px !important;
                 right: 2px !important;
-                height: 12px !important;
-                background: #6d4c41 !important;
+                height: 14px !important;
+                background: #5d4037 !important;
                 border-radius: 2px !important;
             }
             
@@ -162,10 +166,14 @@
                 display: none !important;
             }
             
+            .workstation.working {
+                display: flex !important;
+            }
+            
             .workstation .agent-icon {
-                font-size: 22px !important;
+                font-size: 24px !important;
                 z-index: 2 !important;
-                margin-bottom: 8px !important;
+                margin-bottom: 10px !important;
             }
             
             .workstation .agent-name {
@@ -179,18 +187,18 @@
             .workstation .ticket-badge {
                 display: block !important;
                 position: absolute !important;
-                top: -16px !important;
+                top: -18px !important;
                 left: 50% !important;
                 transform: translateX(-50%) !important;
                 background: #1976d2 !important;
                 color: white !important;
-                font-size: 6px !important;
+                font-size: 7px !important;
                 font-weight: bold !important;
-                padding: 2px 4px !important;
+                padding: 3px 5px !important;
                 border-radius: 3px !important;
                 white-space: nowrap !important;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-                z-index: 10 !important;
+                z-index: 30 !important;
             }
             
             .status-dot {
@@ -201,20 +209,23 @@
             .cots-area {
                 display: flex !important;
                 position: absolute !important;
+                top: auto !important;
                 bottom: 4% !important;
                 left: 50% !important;
+                right: auto !important;
                 transform: translateX(-50%) !important;
                 flex-direction: row !important;
                 flex-wrap: wrap !important;
                 gap: 8px !important;
                 justify-content: center !important;
                 max-width: 95% !important;
+                z-index: 15 !important;
             }
             
             .cot {
                 display: flex !important;
-                width: 50px !important;
-                height: 30px !important;
+                width: 52px !important;
+                height: 32px !important;
                 background: linear-gradient(180deg, #8d6e63 0%, #6d4c41 100%) !important;
                 border-radius: 4px !important;
                 position: relative !important;
@@ -247,16 +258,19 @@
             
             .cot .sleeping-agent {
                 position: relative !important;
-                font-size: 14px !important;
+                font-size: 15px !important;
                 z-index: 2 !important;
+                top: auto !important;
+                left: auto !important;
             }
             
             .cot .zzz {
                 position: absolute !important;
-                top: -6px !important;
+                top: -8px !important;
                 right: 4px !important;
-                font-size: 8px !important;
+                font-size: 9px !important;
                 z-index: 3 !important;
+                color: #666 !important;
             }
         }
         
