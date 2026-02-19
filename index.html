@@ -1713,6 +1713,21 @@
                 top: 20% !important;
                 right: 8% !important;
             }
+            
+            /* Popover - mobile friendly */
+            .agent-popover {
+                min-width: 250px !important;
+                max-width: 90vw !important;
+                padding: 12px !important;
+            }
+            
+            .agent-popover .agent-emoji {
+                font-size: 24px !important;
+            }
+            
+            .agent-popover .agent-header h3 {
+                font-size: 16px !important;
+            }
         }
     </style>
 </head>
@@ -2296,10 +2311,35 @@
                 notionLink.style.display = 'none';
             }
             
-            // Position popover near the workstation
+            // Position popover near the workstation (with viewport bounds check)
             const rect = event.target.closest('.workstation').getBoundingClientRect();
-            popover.style.left = (rect.left + rect.width / 2 - 150) + 'px';
-            popover.style.top = (rect.top - 220) + 'px';
+            const popoverWidth = 300;
+            const popoverHeight = 220;
+            const padding = 10;
+            
+            // Calculate initial position
+            let left = rect.left + rect.width / 2 - popoverWidth / 2;
+            let top = rect.top - popoverHeight - 10;
+            
+            // Keep within horizontal bounds
+            if (left < padding) {
+                left = padding;
+            } else if (left + popoverWidth > window.innerWidth - padding) {
+                left = window.innerWidth - popoverWidth - padding;
+            }
+            
+            // Keep within vertical bounds - if too high, show below the desk
+            if (top < padding) {
+                top = rect.bottom + 10;
+            }
+            
+            // If still off-screen at bottom, center vertically
+            if (top + popoverHeight > window.innerHeight - padding) {
+                top = Math.max(padding, (window.innerHeight - popoverHeight) / 2);
+            }
+            
+            popover.style.left = left + 'px';
+            popover.style.top = top + 'px';
             
             // Show popover
             popover.classList.add('show');
