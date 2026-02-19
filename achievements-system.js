@@ -665,12 +665,19 @@ class AchievementsManager {
             const item = document.createElement('div');
             item.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
             
+            const progressPercent = Math.min((progress / achievement.requirement) * 100, 100);
+            
             item.innerHTML = `
                 <div class="achievement-icon">${isUnlocked ? achievement.icon : '🔒'}</div>
                 <div class="achievement-info">
                     <div class="achievement-title">${achievement.title}</div>
                     <div class="achievement-description">${achievement.description}</div>
                     <div class="achievement-progress">${isUnlocked ? 'Unlocked!' : `${progress}/${achievement.requirement}`}</div>
+                    ${!isUnlocked ? `
+                        <div class="achievement-progress-bar">
+                            <div class="achievement-progress-fill" style="width: ${progressPercent}%"></div>
+                        </div>
+                    ` : ''}
                 </div>
             `;
             

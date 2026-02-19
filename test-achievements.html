@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Achievements System</title>
+    <style>
+        body {
+            font-family: system-ui;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .test-button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .test-button:hover {
+            background: #45a049;
+        }
+        
+        .log {
+            background: #333;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        /* Include minimal office container for testing */
+        .office-container {
+            position: relative;
+            width: 900px;
+            height: 600px;
+            background: linear-gradient(135deg, #f5f0e8 0%, #e8e0d5 100%);
+            border-radius: 12px;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        
+        .status-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            max-width: 180px;
+        }
+        
+        .status-panel h3 {
+            font-size: 12px;
+            margin-bottom: 8px;
+            color: #4fc3f7;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🦉 Achievement System Test</h1>
+        
+        <div class="office-container">
+            <div class="status-panel">
+                <h3>📊 Office Status</h3>
+                <div>Test Environment</div>
+            </div>
+        </div>
+        
+        <div>
+            <button class="test-button" onclick="testCompletion()">🎯 Simulate Task Completion</button>
+            <button class="test-button" onclick="testMultiple()">🚀 Complete 5 Tasks</button>
+            <button class="test-button" onclick="testConfetti()">🎉 Trigger Confetti</button>
+            <button class="test-button" onclick="testTrophyCase()">🏆 Toggle Trophy Case</button>
+            <button class="test-button" onclick="testReset()">🔄 Reset Achievements</button>
+        </div>
+        
+        <div class="log" id="log"></div>
+    </div>
+    
+    <!-- Mock office state for testing -->
+    <script>
+        // Mock the office state system for testing
+        class MockOfficeState {
+            constructor() {
+                this.eventListeners = new Map();
+            }
+            
+            on(event, callback) {
+                if (!this.eventListeners.has(event)) {
+                    this.eventListeners.set(event, []);
+                }
+                this.eventListeners.get(event).push(callback);
+            }
+            
+            emit(event, data) {
+                if (this.eventListeners.has(event)) {
+                    this.eventListeners.get(event).forEach(callback => callback(data));
+                }
+            }
+        }
+        
+        window.officeState = new MockOfficeState();
+        
+        // Logging function
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        // Override console.log to show in our log div
+        const originalLog = console.log;
+        console.log = function(...args) {
+            log(args.join(' '));
+            originalLog.apply(console, args);
+        };
+    </script>
+    
+    <!-- Include the achievements system -->
+    <script src="achievements-system.js"></script>
+    
+    <script>
+        // Test functions
+        function testCompletion() {
+            log('🎯 Simulating task completion...');
+            window.officeState.emit('taskCompleted', {
+                taskId: 'TEST-' + Date.now(),
+                agentName: 'test-agent',
+                timestamp: Date.now()
+            });
+        }
+        
+        function testMultiple() {
+            log('🚀 Simulating 5 task completions...');
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    window.officeState.emit('taskCompleted', {
+                        taskId: 'BATCH-' + Date.now() + '-' + i,
+                        agentName: 'test-agent',
+                        timestamp: Date.now()
+                    });
+                }, i * 500);
+            }
+        }
+        
+        function testConfetti() {
+            log('🎉 Triggering confetti...');
+            if (window.achievements) {
+                window.achievements.triggerConfetti();
+            }
+        }
+        
+        function testTrophyCase() {
+            log('🏆 Toggling trophy case...');
+            if (window.achievements) {
+                window.achievements.toggleTrophyCase();
+            }
+        }
+        
+        function testReset() {
+            log('🔄 Resetting achievements...');
+            if (window.achievements) {
+                window.achievements.resetAchievements();
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🦉 Achievement Test Environment Ready!');
+            log('Click buttons above to test the achievement system.');
+        });
+    </script>
+</body>
+</html>
