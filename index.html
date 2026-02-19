@@ -1978,6 +1978,9 @@
     <div id="debugPanel" style="position:fixed;bottom:60px;left:5px;right:5px;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:10px;padding:8px;border-radius:5px;max-height:150px;overflow-y:auto;z-index:9999;">
         <div><strong>🔧 DEBUG MODE</strong></div>
         <div id="debugLog">Loading...</div>
+        <div id="syncStatus">Sync: Not started</div>
+        <div id="taskCount">Tasks: 0</div>
+        <div id="workingAgents">Working: None</div>
     </div>
 
     <!-- Agent Popover -->
@@ -2708,7 +2711,7 @@
     <!-- 🎯 REAL-TIME BADGE SYNC SYSTEM -->
     <script>
         // Real-time badge sync from Cloudflare Worker
-        const WORKER_ENDPOINT = 'https://office-notion-proxy.your-worker-domain.workers.dev/api/tasks';
+        const WORKER_ENDPOINT = 'https://mission-control-sync.jonathancaras.workers.dev/';
         const AGENT_NAME_MAP = {
             'alice': ['Alice', 'alice', 'ALICE'],
             'alpha': ['Alpha', 'Worker-Alpha', 'ALPHA', 'alpha'],
@@ -2743,9 +2746,11 @@
                 
                 updateAgentBadges(data.tasks);
                 console.log(`✅ Synced ${data.tasks.length} tasks from Mission Control`);
+                updateDebugPanel();
                 
             } catch (error) {
                 console.error('❌ Badge sync failed:', error);
+                console.log('🔄 Using demo data with test tasks...');
                 // Fallback to demo data if worker unavailable
                 useDemoData();
             }
@@ -2849,13 +2854,18 @@
         }
         
         function updateAgentBadges(tasks) {
+            console.log('🎯 updateAgentBadges called with tasks:', tasks);
+            
             // Build new state map
             const newStates = {};
             tasks.forEach(task => {
+                console.log(`🔍 Processing task: ${task.taskId} assigned to ${task.assignee} with status ${task.status}`);
                 if (task.assignee && task.status === 'In Progress') {
                     const agentKey = findAgentKey(task.assignee);
+                    console.log(`🔍 Agent key found: ${agentKey} for assignee: ${task.assignee}`);
                     if (agentKey) {
                         newStates[agentKey] = { working: true, taskId: task.taskId };
+                        console.log(`✅ Set ${agentKey} to working with task ${task.taskId}`);
                     }
                 }
             });
@@ -2864,6 +2874,8 @@
             if (!newStates['alice']) {
                 newStates['alice'] = { working: true, taskId: 'CHATTING' };
             }
+            
+            console.log('🏗️ New agent states:', newStates);
             
             // Detect state changes and animate
             document.querySelectorAll('.workstation').forEach(workstation => {
@@ -2950,24 +2962,31 @@
         }
 
         function findAgentKey(assigneeName) {
+            console.log(`🔍 findAgentKey called with: "${assigneeName}"`);
             for (const [key, variants] of Object.entries(AGENT_NAME_MAP)) {
+                console.log(`🔍 Checking ${key} variants:`, variants);
                 if (variants.some(variant => 
                     assigneeName.toLowerCase().includes(variant.toLowerCase()) ||
                     variant.toLowerCase().includes(assigneeName.toLowerCase())
                 )) {
+                    console.log(`✅ Match found: ${assigneeName} -> ${key}`);
                     return key;
                 }
             }
+            console.log(`❌ No match found for: ${assigneeName}`);
             return null;
         }
 
         function useDemoData() {
-            console.log('🦜 Alice always at desk (no active MC tasks)');
-            // Alice is always working - she's chatting with J!
-            // Other agents sleep until they have real MC tasks
-            updateAgentBadges([
-                { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' }
-            ]);
+            console.log('🦜 Using demo data with GAMMA-LIVE-TEST and EPSILON-QA-FIX');
+            // Test data to show what SHOULD happen
+            currentTasks = [
+                { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' },
+                { taskId: 'GAMMA-LIVE-TEST', assignee: 'Gamma', status: 'In Progress', url: 'https://notion.so/gamma-test' },
+                { taskId: 'EPSILON-QA-FIX', assignee: 'Epsilon', status: 'In Progress', url: 'https://notion.so/epsilon-qa' }
+            ];
+            updateAgentBadges(currentTasks);
+            updateDebugPanel();
         }
 
         // Enhanced openNotionTask with URL support
@@ -3002,11 +3021,27 @@
             setInterval(syncBadgesFromWorker, 30000);
         }
 
+        // Update debug panel
+        function updateDebugPanel() {
+            document.getElementById('debugLog').innerHTML = 'System running...';
+            document.getElementById('syncStatus').innerHTML = `Sync: ${lastSyncTime ? new Date(lastSyncTime).toLocaleTimeString() : 'Never'}`;
+            document.getElementById('taskCount').innerHTML = `Tasks: ${currentTasks.length}`;
+            
+            const workingAgents = [];
+            document.querySelectorAll('.workstation.working').forEach(ws => {
+                const agentName = ws.getAttribute('data-agent');
+                const taskBadge = ws.querySelector('.ticket-badge').textContent;
+                if (taskBadge) workingAgents.push(`${agentName}(${taskBadge})`);
+            });
+            document.getElementById('workingAgents').innerHTML = `Working: ${workingAgents.length > 0 ? workingAgents.join(', ') : 'None'}`;
+        }
+
         // Export for debugging
         window.badgeSync = {
             sync: syncBadgesFromWorker,
             tasks: () => currentTasks,
-            lastSync: () => lastSyncTime
+            lastSync: () => lastSyncTime,
+            updateDebug: updateDebugPanel
         };
     </script>
 
