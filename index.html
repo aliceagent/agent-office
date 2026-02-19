@@ -473,6 +473,63 @@
         .status-item .icon {
             font-size: 14px;
         }
+
+        /* Activity Feed Ticker */
+        .activity-ticker {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(90deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            overflow: hidden;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+        }
+
+        .ticker-content {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            white-space: nowrap;
+            animation: scroll 60s linear infinite;
+        }
+
+        .ticker-event {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .ticker-event:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .ticker-event .event-icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .ticker-event .event-time {
+            margin-left: 10px;
+            opacity: 0.8;
+            font-size: 12px;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .ticker-paused .ticker-content {
+            animation-play-state: paused;
+        }
         
         /* Cots */
         .cots-area {
@@ -1704,6 +1761,162 @@
         };
     </script>
 
+    <!-- 📰 ACTIVITY FEED TICKER SYSTEM -->
+    <script>
+        let activityEvents = [];
+        const MAX_EVENTS = 10;
+
+        function addActivityEvent(type, message, agentIcon = '', notionUrl = null) {
+            const event = {
+                id: Date.now() + Math.random(),
+                type: type, // 'claim', 'complete', 'assign', 'move'
+                message: message,
+                icon: getEventIcon(type),
+                agentIcon: agentIcon,
+                timestamp: new Date(),
+                notionUrl: notionUrl
+            };
+
+            activityEvents.unshift(event); // Add to front
+            
+            // Keep only latest MAX_EVENTS
+            if (activityEvents.length > MAX_EVENTS) {
+                activityEvents = activityEvents.slice(0, MAX_EVENTS);
+            }
+
+            updateTickerDisplay();
+            console.log(`📰 Activity: ${message}`);
+        }
+
+        function getEventIcon(type) {
+            const icons = {
+                claim: '🎯',
+                complete: '✅', 
+                assign: '📋',
+                move: '🚶',
+                sync: '🔄',
+                wake: '☕',
+                sleep: '💤'
+            };
+            return icons[type] || '📰';
+        }
+
+        function updateTickerDisplay() {
+            const tickerContent = document.getElementById('tickerContent');
+            if (!tickerContent) return;
+
+            tickerContent.innerHTML = activityEvents.map(event => {
+                const timeAgo = getTimeAgo(event.timestamp);
+                return `
+                    <div class="ticker-event" onclick="openEventUrl('${event.notionUrl || ''}', '${event.type}')">
+                        <span class="event-icon">${event.icon}</span>
+                        <span class="event-agent">${event.agentIcon}</span>
+                        <span class="event-message">${event.message}</span>
+                        <span class="event-time">${timeAgo}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const diffMs = now - timestamp;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+
+            if (diffMins < 1) return 'now';
+            if (diffMins < 60) return `${diffMins}m`;
+            if (diffHours < 24) return `${diffHours}h`;
+            return timestamp.toLocaleDateString();
+        }
+
+        function openEventUrl(notionUrl, eventType) {
+            if (notionUrl && notionUrl !== 'null' && notionUrl !== '') {
+                window.open(notionUrl, '_blank');
+            } else {
+                // Fallback to Mission Control board
+                window.open('https://www.notion.so/2fe419064d3081bc8155ee2719c1d365', '_blank');
+            }
+        }
+
+        // Hook into existing systems to generate activity
+        function initializeActivityFeed() {
+            console.log('📰 Initializing activity feed ticker...');
+
+            // Add initial demo events
+            addActivityEvent('sync', 'Office systems initialized', '🏢');
+            
+            setTimeout(() => {
+                addActivityEvent('wake', 'Alice started her shift', '🦜');
+            }, 2000);
+
+            setTimeout(() => {
+                addActivityEvent('claim', 'Worker-Alpha claimed OFFICE-FIX-1', '🐺');
+            }, 4000);
+        }
+
+        // Hook into badge sync to track task events
+        const originalSyncBadges = syncBadgesFromWorker;
+        syncBadgesFromWorker = async function() {
+            await originalSyncBadges();
+            
+            // Generate activity based on task changes
+            if (currentTasks && currentTasks.length > 0) {
+                const activeTasks = currentTasks.filter(task => 
+                    task.status === 'In Progress' || task.status === 'Not Started'
+                );
+                
+                // Check for newly assigned tasks (simple demo)
+                activeTasks.forEach(task => {
+                    if (task.assignee && Math.random() < 0.1) { // 10% chance to show activity
+                        const agentKey = findAgentKey(task.assignee);
+                        const agentIcon = agentKey ? AGENT_ICONS[agentKey] : '🤖';
+                        const action = task.status === 'In Progress' ? 'working on' : 'assigned to';
+                        
+                        addActivityEvent(
+                            task.status === 'In Progress' ? 'claim' : 'assign',
+                            `${task.assignee} ${action} ${task.taskId}`,
+                            agentIcon,
+                            task.url
+                        );
+                    }
+                });
+            }
+        };
+
+        // Hook into location system for movement events  
+        const originalUpdateAgentLocation = updateAgentLocation;
+        updateAgentLocation = function(agentKey, newLocation, newStatus) {
+            const oldLocation = agentStates[agentKey]?.location;
+            originalUpdateAgentLocation(agentKey, newLocation, newStatus);
+            
+            // Generate movement activity
+            if (oldLocation && oldLocation !== newLocation && Math.random() < 0.3) {
+                const agentIcon = AGENT_ICONS[agentKey];
+                const locationName = newLocation === 'desk' ? 'workstation' : newLocation;
+                addActivityEvent('move', `${agentKey} moved to ${locationName}`, agentIcon);
+            }
+        };
+
+        // Ticker controls
+        function pauseTicker() {
+            document.getElementById('activityTicker').classList.add('ticker-paused');
+        }
+
+        function resumeTicker() {
+            document.getElementById('activityTicker').classList.remove('ticker-paused');
+        }
+
+        // Export for debugging
+        window.activityFeed = {
+            events: () => activityEvents,
+            add: addActivityEvent,
+            pause: pauseTicker,
+            resume: resumeTicker,
+            init: initializeActivityFeed
+        };
+    </script>
+
     <script>
         // Integration layer - connecting Epsilon's state system with the existing UI
         document.addEventListener('DOMContentLoaded', function() {
@@ -1719,6 +1932,10 @@
             
             // Start periodic shuffling of idle agents
             setInterval(shuffleIdleAgents, 45000); // Every 45 seconds
+            
+            // Initialize activity feed ticker
+            initializeActivityFeed();
+            console.log('📰 Activity feed ticker initialized!');
             
             // Listen to state events for enhanced UI feedback
             window.officeState.on('taskAssigned', (data) => {
@@ -1802,5 +2019,12 @@
         console.log('  epsilon.sequenceDiagram() - View workflow diagram');
         console.log('  epsilon.tentacles - See my beautiful tentacles!');
     </script>
+
+    <!-- Activity Feed Ticker -->
+    <div class="activity-ticker" id="activityTicker">
+        <div class="ticker-content" id="tickerContent">
+            <!-- Activity events will be populated here -->
+        </div>
+    </div>
 </body>
 </html>
