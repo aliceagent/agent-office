@@ -2941,6 +2941,12 @@
                 if (!wasWorking && isWorking && bed && workstation) {
                     // Agent waking up - animate from bed to desk
                     console.log(`🚶 ${agentKey} waking up - walking from bed to desk`);
+                    const bedAvatar = bed.querySelector('.sleeping-agent');
+                    const bedZzz = bed.querySelector('.zzz');
+                    // Hide bed avatar during walk
+                    if (bedAvatar) bedAvatar.style.visibility = 'hidden';
+                    if (bedZzz) bedZzz.style.visibility = 'hidden';
+                    
                     animateAgentWalk(agentKey, emoji, bed, workstation, () => {
                         workstation.classList.add('working');
                         if (bed) bed.classList.add('working');
@@ -2954,6 +2960,9 @@
                 } else if (wasWorking && !isWorking && bed && workstation) {
                     // Agent going to sleep - animate from desk to bed
                     console.log(`🚶 ${agentKey} finished work - walking from desk to bed`);
+                    const bedAvatar = bed.querySelector('.sleeping-agent');
+                    const bedZzz = bed.querySelector('.zzz');
+                    
                     animateAgentWalk(agentKey, emoji, workstation, bed, () => {
                         workstation.classList.remove('working');
                         if (bed) bed.classList.remove('working');
@@ -2962,6 +2971,9 @@
                         badge.style.display = 'none';
                         const statusDot = workstation.querySelector('.status-dot');
                         statusDot.classList.remove('working');
+                        // Show bed avatar again
+                        if (bedAvatar) bedAvatar.style.visibility = 'visible';
+                        if (bedZzz) bedZzz.style.visibility = 'visible';
                         console.log(`💤 ${agentKey} is now sleeping`);
                     });
                 } else if (isWorking && workstation) {
@@ -3197,6 +3209,8 @@
             const bed = document.querySelector(`.cot[data-agent="${agentKey}"]`);
             const workstation = document.querySelector(`.workstation[data-agent="${agentKey}"]`);
             const emoji = agentData[agentKey]?.emoji || '🤖';
+            const bedAvatar = bed?.querySelector('.sleeping-agent');
+            const bedZzz = bed?.querySelector('.zzz');
             
             if (!bed || !workstation) {
                 console.error(`❌ Could not find bed or workstation for ${agentKey}`);
@@ -3207,15 +3221,26 @@
             console.log(`🧪 Found bed:`, bed);
             console.log(`🧪 Found workstation:`, workstation);
             
+            // Hide bed avatar and zzz during walk
+            if (bedAvatar) bedAvatar.style.visibility = 'hidden';
+            if (bedZzz) bedZzz.style.visibility = 'hidden';
+            
             // Test walk from bed to desk
             animateAgentWalk(agentKey, emoji, bed, workstation, () => {
                 console.log(`✅ ${agentKey} arrived at desk!`);
-                // After 2 seconds, walk back to bed
+                // Show at desk
+                workstation.classList.add('working');
+                
+                // After 3 seconds, walk back to bed
                 setTimeout(() => {
+                    workstation.classList.remove('working');
                     animateAgentWalk(agentKey, emoji, workstation, bed, () => {
                         console.log(`💤 ${agentKey} back in bed!`);
+                        // Show bed avatar again
+                        if (bedAvatar) bedAvatar.style.visibility = 'visible';
+                        if (bedZzz) bedZzz.style.visibility = 'visible';
                     });
-                }, 2000);
+                }, 3000);
             });
         };
 
