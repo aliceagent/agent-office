@@ -1750,6 +1750,25 @@
                 right: 8% !important;
             }
             
+            /* Walking agent sprite */
+            .walking-agent {
+                position: absolute;
+                font-size: 24px;
+                z-index: 1000;
+                pointer-events: none;
+                transition: none;
+                filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+            }
+            
+            .walking-agent.walking {
+                animation: bobWalk 0.3s ease-in-out infinite;
+            }
+            
+            @keyframes bobWalk {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-4px); }
+            }
+            
             /* Popover - mobile friendly */
             .agent-popover {
                 min-width: 250px !important;
@@ -2726,7 +2745,148 @@
             }
         }
 
+        // Track previous agent states for animation
+        const previousAgentStates = {};
+        
+        // Get element center position
+        function getElementCenter(el) {
+            const rect = el.getBoundingClientRect();
+            const container = document.querySelector('.office-container').getBoundingClientRect();
+            return {
+                x: rect.left - container.left + rect.width / 2,
+                y: rect.top - container.top + rect.height / 2
+            };
+        }
+        
+        // Pathfinding waypoints to avoid pool table
+        function getWalkPath(from, to) {
+            const poolTable = document.querySelector('.pool-table');
+            if (!poolTable) return [from, to];
+            
+            const poolRect = poolTable.getBoundingClientRect();
+            const container = document.querySelector('.office-container').getBoundingClientRect();
+            const poolCenter = {
+                x: poolRect.left - container.left + poolRect.width / 2,
+                y: poolRect.top - container.top + poolRect.height / 2
+            };
+            const poolRadius = Math.max(poolRect.width, poolRect.height) / 2 + 30;
+            
+            // Check if direct path crosses pool table
+            const dx = to.x - from.x;
+            const dy = to.y - from.y;
+            const midX = from.x + dx / 2;
+            const midY = from.y + dy / 2;
+            
+            const distToPool = Math.sqrt(Math.pow(midX - poolCenter.x, 2) + Math.pow(midY - poolCenter.y, 2));
+            
+            if (distToPool < poolRadius) {
+                // Need to go around - pick top or bottom based on positions
+                const goAbove = from.y < poolCenter.y || to.y < poolCenter.y;
+                const waypoint = {
+                    x: poolCenter.x,
+                    y: goAbove ? poolCenter.y - poolRadius - 20 : poolCenter.y + poolRadius + 20
+                };
+                return [from, waypoint, to];
+            }
+            
+            return [from, to];
+        }
+        
+        // Animate agent walking along path
+        function animateAgentWalk(agentKey, emoji, fromEl, toEl, callback) {
+            const from = getElementCenter(fromEl);
+            const to = getElementCenter(toEl);
+            const path = getWalkPath(from, to);
+            
+            // Create walking sprite
+            const walker = document.createElement('div');
+            walker.className = 'walking-agent walking';
+            walker.textContent = emoji;
+            walker.style.left = from.x + 'px';
+            walker.style.top = from.y + 'px';
+            document.querySelector('.office-container').appendChild(walker);
+            
+            let currentPoint = 0;
+            const speed = 80; // pixels per frame interval
+            
+            function moveStep() {
+                if (currentPoint >= path.length - 1) {
+                    walker.remove();
+                    if (callback) callback();
+                    return;
+                }
+                
+                const target = path[currentPoint + 1];
+                const current = { 
+                    x: parseFloat(walker.style.left), 
+                    y: parseFloat(walker.style.top) 
+                };
+                
+                const dx = target.x - current.x;
+                const dy = target.y - current.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < speed) {
+                    walker.style.left = target.x + 'px';
+                    walker.style.top = target.y + 'px';
+                    currentPoint++;
+                    setTimeout(moveStep, 50);
+                } else {
+                    const ratio = speed / dist;
+                    walker.style.left = (current.x + dx * ratio) + 'px';
+                    walker.style.top = (current.y + dy * ratio) + 'px';
+                    setTimeout(moveStep, 50);
+                }
+            }
+            
+            moveStep();
+        }
+        
         function updateAgentBadges(tasks) {
+            // Build new state map
+            const newStates = {};
+            tasks.forEach(task => {
+                if (task.assignee && task.status === 'In Progress') {
+                    const agentKey = findAgentKey(task.assignee);
+                    if (agentKey) {
+                        newStates[agentKey] = { working: true, taskId: task.taskId };
+                    }
+                }
+            });
+            
+            // Always mark Alice as working
+            if (!newStates['alice']) {
+                newStates['alice'] = { working: true, taskId: 'CHATTING' };
+            }
+            
+            // Detect state changes and animate
+            document.querySelectorAll('.workstation').forEach(workstation => {
+                const agentKey = workstation.getAttribute('data-agent');
+                const wasWorking = previousAgentStates[agentKey]?.working || false;
+                const isWorking = newStates[agentKey]?.working || false;
+                const bed = document.querySelector(`.cot[data-agent="${agentKey}"]`);
+                const emoji = agentData[agentKey]?.emoji || '🤖';
+                
+                if (!wasWorking && isWorking && bed && agentKey !== 'alice') {
+                    // Agent waking up - animate from bed to desk
+                    animateAgentWalk(agentKey, emoji, bed, workstation, () => {
+                        workstation.classList.add('working');
+                        if (bed) bed.classList.add('working');
+                    });
+                } else if (wasWorking && !isWorking && bed && agentKey !== 'alice') {
+                    // Agent going to sleep - animate from desk to bed
+                    animateAgentWalk(agentKey, emoji, workstation, bed, () => {
+                        workstation.classList.remove('working');
+                        if (bed) bed.classList.remove('working');
+                    });
+                }
+            });
+            
+            // Store new states
+            Object.keys(newStates).forEach(key => {
+                previousAgentStates[key] = newStates[key];
+            });
+            
             // Clear all existing badges and working status
             document.querySelectorAll('.workstation').forEach(workstation => {
                 const badge = workstation.querySelector('.ticket-badge');
