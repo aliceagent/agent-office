@@ -1181,49 +1181,68 @@
 
         /* Responsive Container Queries for Overlap Prevention */
         @container (max-width: 480px) {
+            /* DESKS - RIGHT SIDE */
             .workstation-row {
-                flex-wrap: wrap;
-                bottom: 5px;
-                left: 5px;
-                gap: 5px;
-                max-width: calc(100% - 10px);
+                position: absolute !important;
+                top: 50% !important;
+                bottom: auto !important;
+                left: auto !important;
+                right: 5% !important;
+                transform: translateY(-50%) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+                max-width: none !important;
             }
             
             .workstation {
-                width: clamp(40px, 12vw, 50px);
-                height: clamp(30px, 9vw, 40px);
-                font-size: clamp(12px, 3vw, 16px);
+                width: 52px !important;
+                height: 45px !important;
             }
             
+            .workstation:not(.working) {
+                display: none !important;
+            }
+            
+            /* BEDS - LEFT SIDE */
+            .cots-area {
+                position: absolute !important;
+                top: 50% !important;
+                bottom: auto !important;
+                left: 5% !important;
+                right: auto !important;
+                transform: translateY(-50%) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 6px !important;
+            }
+            
+            .cot {
+                display: flex !important;
+                width: 48px !important;
+                height: 26px !important;
+            }
+            
+            /* POOL TABLE - CENTER */
             .pool-table {
-                width: clamp(120px, 30vw, 150px);
-                height: clamp(70px, 18vw, 85px);
-                top: 40%;
-                left: 50%;
-            }
-            
-            .couch {
-                width: clamp(80px, 25vw, 100px);
-                height: clamp(35px, 12vw, 45px);
-                bottom: 80px;
-                left: 15px;
+                width: 85px !important;
+                height: 50px !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) rotate(90deg) !important;
             }
             
             .bookshelf {
-                width: clamp(200px, 80vw, 400px);
-                height: clamp(80px, 20vw, 110px);
-                top: 20px;
+                width: clamp(200px, 85vw, 380px);
+                height: clamp(70px, 18vw, 90px);
+                top: 15px;
             }
             
-            .portraits-gallery {
-                gap: 4px;
-                top: 3px;
-            }
-            
-            .portrait {
-                width: 20px;
-                height: 20px;
-                font-size: 10px;
+            /* Hide clutter */
+            .couch, .portraits-gallery, .portrait, .status-panel,
+            .trophy-case, #trophy-case, .sound-toggle, .mail-chute,
+            .kitchen, .door, .window, .plant, .armchair, .night-lamp {
+                display: none !important;
             }
         }
 
