@@ -2109,9 +2109,20 @@
                 font-size: 16px !important;
             }
         }
-        /* GLOBAL: Hide duplicate agent displays */
+        /* GLOBAL: Hide duplicate agent displays - only show cots on right */
         .portraits-gallery,
+        .portraits-gallery * {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+        }
+        
+        /* Keep desks visible but hide agent icons inside them (agents show in cots) */
         .workstation-row {
+            display: flex !important;
+        }
+        .workstation .agent-icon,
+        .workstation .agent-name {
             display: none !important;
         }
     </style>
