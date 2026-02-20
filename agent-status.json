@@ -11,34 +11,34 @@
     },
     "beta": {
       "status": "working",
-      "task": "OFF-4-2"
+      "task": "REJ-3-1"
     },
     "gamma": {
-      "status": "working",
-      "task": "GAMMA-LIVE-TEST"
+      "status": "sleeping",
+      "task": null
     },
     "delta": {
       "status": "sleeping",
       "task": null
     },
     "epsilon": {
-      "status": "working",
-      "task": "EPSILON-QA-FIX"
+      "status": "sleeping",
+      "task": null
     },
     "zeta": {
-      "status": "working",
-      "task": "OFF-4-1"
+      "status": "sleeping",
+      "task": null
     },
     "eta": {
       "status": "sleeping",
       "task": null
     },
     "theta": {
-      "status": "working",
-      "task": "OFF-LIVE-TEST"
+      "status": "sleeping",
+      "task": null
     }
   },
-  "taskCount": 13,
-  "timestamp": 1771596169189,
-  "updatedAt": "2026-02-20T16:02:49.189387"
+  "taskCount": 8,
+  "timestamp": 1771596367097,
+  "updatedAt": "2026-02-20T16:06:07.097423"
 }
