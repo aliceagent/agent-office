@@ -18,8 +18,8 @@
       "task": null
     },
     "delta": {
-      "status": "sleeping",
-      "task": null
+      "status": "working",
+      "task": "ANIM-TEST-DELTA"
     },
     "epsilon": {
       "status": "sleeping",
@@ -38,7 +38,7 @@
       "task": null
     }
   },
-  "taskCount": 8,
-  "timestamp": 1771596367097,
-  "updatedAt": "2026-02-20T16:06:07.097423"
+  "taskCount": 9,
+  "timestamp": 1771596474267,
+  "updatedAt": "2026-02-20T16:07:54.267955"
 }
