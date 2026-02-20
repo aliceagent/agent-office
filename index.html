@@ -3325,7 +3325,7 @@
         // Handle new agent status format
         function updateAgentBadgesFromStatus(agents) {
             for (const [agentKey, agentData] of Object.entries(agents)) {
-                const workstation = document.querySelector(`[data-agent="${agentKey}"]`);
+                const workstation = document.querySelector(`.workstation[data-agent="${agentKey}"]`);
                 const cot = document.querySelector(`.cot[data-agent="${agentKey}"]`);
                 
                 if (!workstation) continue;
@@ -4225,7 +4225,7 @@
             console.log(`🗺️ ${agentKey}: ${oldLocation} → ${newLocation} (${agent.status})`);
             
             // Update workstation visibility
-            const workstation = document.querySelector(`[data-agent="${agentKey}"]`);
+            const workstation = document.querySelector(`.workstation[data-agent="${agentKey}"]`);
             if (workstation) {
                 const statusDot = workstation.querySelector('.status-dot');
                 
@@ -4302,7 +4302,7 @@
         }
 
         function clearFromCot(agentKey) {
-            const sleepingAgent = document.querySelector(`[data-agent="${agentKey}"].sleeping-agent`);
+            const sleepingAgent = document.querySelector(`.workstation[data-agent="${agentKey}"].sleeping-agent`);
             if (sleepingAgent) {
                 const cot = sleepingAgent.parentElement;
                 const zzz = cot.querySelector('.zzz');
