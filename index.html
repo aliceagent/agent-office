@@ -2117,16 +2117,20 @@
         .window {
             display: none !important;
         }
-        /* Reposition workstation-row as a vertical desk column left of cots */
+        /* Workstation-row: vertical column in the floor area, right side */
         .workstation-row {
             display: flex !important;
             flex-direction: column !important;
             position: absolute !important;
-            top: 180px !important;
+            top: 38% !important;      /* below the wall/bookshelf */
             right: 110px !important;  /* left of cots */
             left: auto !important;
             bottom: auto !important;
             gap: 8px !important;
+        }
+        /* Only show desks for WORKING agents — hide empty desks */
+        .workstation:not(.working) {
+            display: none !important;
         }
     </style>
 </head>
