@@ -29,7 +29,7 @@ def get_mission_control_tasks():
     payload = {
         "filter": {
             "property": "Status",
-            "status": {
+            "select": {
                 "equals": "In Progress"
             }
         }
@@ -51,10 +51,17 @@ def get_mission_control_tasks():
             else:
                 task_id = None
             
-            assigned_prop = props.get('Assigned Agent', {})
+            assigned_prop = props.get('Assignee', {})
             if assigned_prop.get('type') == 'select':
                 select = assigned_prop.get('select')
-                assigned = select.get('name', '').lower() if select else None
+                assigned_raw = select.get('name', '') if select else None
+                # Normalize: "Worker-Zeta" -> "zeta"
+                if assigned_raw and 'Worker-' in assigned_raw:
+                    assigned = assigned_raw.replace('Worker-', '').lower()
+                elif assigned_raw:
+                    assigned = assigned_raw.lower()
+                else:
+                    assigned = None
             else:
                 assigned = None
             
