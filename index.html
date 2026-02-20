@@ -2282,19 +2282,40 @@
         </div>
     </div>
     
-    <!-- Debug Panel -->
-    <div id="debugPanel" style="position:fixed;bottom:60px;left:5px;right:5px;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:10px;padding:8px;border-radius:5px;max-height:250px;overflow-y:auto;z-index:9999;">
-        <div><strong>🔧 DEBUG MODE</strong></div>
-        <div style="margin:5px 0;background:#222;padding:5px;border-radius:3px;">
-            <button onclick="syncBadgesFromWorker()" style="font-size:11px;padding:4px 8px;margin-right:4px;background:#4CAF50;color:white;border:none;border-radius:3px;">🔄 Sync</button>
-            <button onclick="testWalkAnimation('beta')" style="font-size:11px;padding:4px 8px;margin-right:4px;background:#2196F3;color:white;border:none;border-radius:3px;">🦊 Beta Walk</button>
-            <button onclick="testWalkAnimation('gamma')" style="font-size:11px;padding:4px 8px;background:#FF9800;color:white;border:none;border-radius:3px;">🦔 Gamma Walk</button>
+    <!-- Debug Toggle Button (Gear) -->
+    <div id="debugToggle" onclick="toggleDebugPanel()" style="position:fixed;bottom:70px;left:10px;width:40px;height:40px;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10000;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,0.3);">⚙️</div>
+    
+    <!-- Debug Panel (Hidden by default) -->
+    <div id="debugPanel" style="display:none;position:fixed;bottom:60px;left:5px;right:5px;background:rgba(0,0,0,0.95);color:#0f0;font-family:monospace;font-size:11px;padding:10px;border-radius:8px;max-height:300px;overflow-y:auto;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <strong>🔧 DEBUG MODE</strong>
+            <span onclick="toggleDebugPanel()" style="cursor:pointer;font-size:16px;">✕</span>
         </div>
-        <div id="debugLog">Loading...</div>
+        <div style="margin:8px 0;background:#222;padding:6px;border-radius:4px;">
+            <button onclick="syncBadgesFromWorker()" style="font-size:11px;padding:5px 10px;margin-right:4px;background:#4CAF50;color:white;border:none;border-radius:4px;">🔄 Sync</button>
+            <button onclick="testWalkAnimation('beta')" style="font-size:11px;padding:5px 10px;margin-right:4px;background:#2196F3;color:white;border:none;border-radius:4px;">🦊 Beta Walk</button>
+            <button onclick="testWalkAnimation('gamma')" style="font-size:11px;padding:5px 10px;background:#FF9800;color:white;border:none;border-radius:4px;">🦔 Gamma Walk</button>
+        </div>
+        <div id="debugLog" style="margin:4px 0;">Loading...</div>
         <div id="syncStatus">Sync: Not started</div>
         <div id="taskCount">Tasks: 0</div>
         <div id="workingAgents">Working: None</div>
+        <div id="sleepingAgents" style="color:#888;">Sleeping: None</div>
     </div>
+    
+    <script>
+    function toggleDebugPanel() {
+        const panel = document.getElementById('debugPanel');
+        const toggle = document.getElementById('debugToggle');
+        if (panel.style.display === 'none') {
+            panel.style.display = 'block';
+            toggle.style.display = 'none';
+        } else {
+            panel.style.display = 'none';
+            toggle.style.display = 'flex';
+        }
+    }
+    </script>
 
     <!-- Agent Popover -->
     <div class="agent-popover" id="agentPopover">
