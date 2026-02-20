@@ -2715,8 +2715,9 @@
     
     <!-- 🎯 REAL-TIME BADGE SYNC SYSTEM -->
     <script>
-        // Real-time badge sync from Cloudflare Worker
+        // Real-time badge sync from Cloudflare Worker with WebSocket support
         const WORKER_ENDPOINT = 'https://mission-control-sync.jonathancaras.workers.dev/';
+        const WS_ENDPOINT = 'wss://mission-control-sync.jonathancaras.workers.dev/ws';
         const AGENT_NAME_MAP = {
             'alice': ['Alice', 'alice', 'ALICE'],
             'alpha': ['Alpha', 'Worker-Alpha', 'ALPHA', 'alpha'],
@@ -2731,6 +2732,242 @@
 
         let lastSyncTime = null;
         let currentTasks = [];
+        
+        // WebSocket Connection Manager - OFF-RT-3
+        class WebSocketManager {
+            constructor() {
+                this.ws = null;
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 5;
+                this.reconnectDelay = 1000;
+                this.isConnected = false;
+                this.heartbeatInterval = null;
+                this.listeners = new Map();
+            }
+            
+            connect() {
+                try {
+                    console.log('🔌 Attempting WebSocket connection...');
+                    this.ws = new WebSocket(WS_ENDPOINT);
+                    
+                    this.ws.onopen = () => {
+                        console.log('✅ WebSocket connected');
+                        this.isConnected = true;
+                        this.reconnectAttempts = 0;
+                        this.startHeartbeat();
+                        this.emit('connected');
+                    };
+                    
+                    this.ws.onmessage = (event) => {
+                        try {
+                            const data = JSON.parse(event.data);
+                            this.handleMessage(data);
+                        } catch (e) {
+                            console.warn('⚠️ Invalid WebSocket message:', event.data);
+                        }
+                    };
+                    
+                    this.ws.onclose = (event) => {
+                        console.log('❌ WebSocket disconnected:', event.code, event.reason);
+                        this.isConnected = false;
+                        this.stopHeartbeat();
+                        
+                        if (event.code !== 1000) { // Not a normal close
+                            this.scheduleReconnect();
+                        }
+                        this.emit('disconnected');
+                    };
+                    
+                    this.ws.onerror = (error) => {
+                        console.error('❌ WebSocket error:', error);
+                        this.emit('error', error);
+                    };
+                    
+                } catch (error) {
+                    console.error('❌ WebSocket connection failed:', error);
+                    this.fallbackToPolling();
+                }
+            }
+            
+            scheduleReconnect() {
+                if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+                    console.log('⚠️ Max reconnect attempts reached, falling back to polling');
+                    this.fallbackToPolling();
+                    return;
+                }
+                
+                const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts);
+                console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})`);
+                
+                setTimeout(() => {
+                    this.reconnectAttempts++;
+                    this.connect();
+                }, delay);
+            }
+            
+            fallbackToPolling() {
+                console.log('📡 Falling back to HTTP polling');
+                this.emit('fallback');
+                // Start polling as fallback
+                setInterval(() => {
+                    if (!this.isConnected) {
+                        syncBadgesFromWorker();
+                    }
+                }, 5000); // More frequent polling when WebSocket unavailable
+            }
+            
+            startHeartbeat() {
+                this.heartbeatInterval = setInterval(() => {
+                    if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
+                        this.ws.send(JSON.stringify({ type: 'ping' }));
+                    }
+                }, 30000); // 30 second heartbeat
+            }
+            
+            stopHeartbeat() {
+                if (this.heartbeatInterval) {
+                    clearInterval(this.heartbeatInterval);
+                    this.heartbeatInterval = null;
+                }
+            }
+            
+            handleMessage(data) {
+                console.log('📨 WebSocket message:', data);
+                
+                switch (data.type) {
+                    case 'pong':
+                        // Heartbeat response
+                        break;
+                    case 'task_update':
+                        this.handleTaskUpdate(data.payload);
+                        break;
+                    case 'agent_state':
+                        this.handleAgentStateUpdate(data.payload);
+                        break;
+                    case 'bulk_sync':
+                        this.handleBulkSync(data.payload);
+                        break;
+                    default:
+                        console.warn('⚠️ Unknown WebSocket message type:', data.type);
+                }
+            }
+            
+            handleTaskUpdate(payload) {
+                console.log('📋 Task update received:', payload);
+                // Update specific task
+                const taskIndex = currentTasks.findIndex(t => t.taskId === payload.taskId);
+                if (taskIndex >= 0) {
+                    currentTasks[taskIndex] = { ...currentTasks[taskIndex], ...payload };
+                } else {
+                    currentTasks.push(payload);
+                }
+                updateAgentBadges(currentTasks);
+            }
+            
+            handleAgentStateUpdate(payload) {
+                console.log('🤖 Agent state update:', payload);
+                // Handle specific agent state changes
+                if (payload.agentId && payload.position) {
+                    this.updateAgentAnimation(payload.agentId, payload.position, payload.animationState);
+                }
+            }
+            
+            updateAgentAnimation(agentId, newPosition, animationState) {
+                // Store animation state for hydration
+                const animationData = {
+                    agentId,
+                    position: newPosition,
+                    animationState,
+                    timestamp: Date.now()
+                };
+                
+                // Save to localStorage for hydration
+                const ongoingAnimations = JSON.parse(localStorage.getItem('ongoingAnimations') || '[]');
+                const filtered = ongoingAnimations.filter(a => a.agentId !== agentId);
+                
+                if (animationState === 'moving') {
+                    filtered.push(animationData);
+                }
+                
+                localStorage.setItem('ongoingAnimations', JSON.stringify(filtered));
+                
+                // Trigger animation
+                if (animationState === 'moving') {
+                    this.startAgentAnimation(agentId, newPosition);
+                }
+            }
+            
+            startAgentAnimation(agentId, targetPosition) {
+                const agentKey = findAgentKey(agentId) || agentId.toLowerCase();
+                const targetEl = targetPosition === 'desk' ? 
+                    document.querySelector(`.workstation[data-agent="${agentKey}"]`) :
+                    document.querySelector(`.cot[data-agent="${agentKey}"]`);
+                const sourceEl = targetPosition === 'desk' ?
+                    document.querySelector(`.cot[data-agent="${agentKey}"]`) :
+                    document.querySelector(`.workstation[data-agent="${agentKey}"]`);
+                
+                if (sourceEl && targetEl) {
+                    const emoji = agentData[agentKey]?.emoji || '🤖';
+                    animateAgentWalk(agentKey, emoji, sourceEl, targetEl, () => {
+                        // Animation complete - clean up localStorage
+                        const ongoingAnimations = JSON.parse(localStorage.getItem('ongoingAnimations') || '[]');
+                        const filtered = ongoingAnimations.filter(a => a.agentId !== agentId);
+                        localStorage.setItem('ongoingAnimations', JSON.stringify(filtered));
+                        
+                        // Update UI state
+                        this.completeAgentAnimation(agentKey, targetPosition);
+                    });
+                }
+            }
+            
+            completeAgentAnimation(agentKey, finalPosition) {
+                const workstation = document.querySelector(`.workstation[data-agent="${agentKey}"]`);
+                const bed = document.querySelector(`.cot[data-agent="${agentKey}"]`);
+                
+                if (finalPosition === 'desk' && workstation) {
+                    workstation.classList.add('working');
+                    if (bed) bed.classList.add('working');
+                } else if (finalPosition === 'bed' && workstation) {
+                    workstation.classList.remove('working');
+                    if (bed) bed.classList.remove('working');
+                }
+            }
+            
+            handleBulkSync(payload) {
+                console.log('🔄 Bulk sync received:', payload);
+                if (payload.tasks) {
+                    currentTasks = payload.tasks;
+                    lastSyncTime = new Date().toISOString();
+                    updateAgentBadges(currentTasks);
+                    updateDebugPanel();
+                }
+            }
+            
+            on(event, callback) {
+                if (!this.listeners.has(event)) {
+                    this.listeners.set(event, []);
+                }
+                this.listeners.get(event).push(callback);
+            }
+            
+            emit(event, data = null) {
+                if (this.listeners.has(event)) {
+                    this.listeners.get(event).forEach(callback => callback(data));
+                }
+            }
+            
+            disconnect() {
+                this.stopHeartbeat();
+                if (this.ws) {
+                    this.ws.close(1000, 'Manual disconnect');
+                    this.ws = null;
+                }
+                this.isConnected = false;
+            }
+        }
+        
+        // Initialize WebSocket manager
+        const wsManager = new WebSocketManager();
 
         async function syncBadgesFromWorker() {
             console.log('🔄 syncBadgesFromWorker called');
@@ -2947,7 +3184,7 @@
                     if (bedAvatar) bedAvatar.style.visibility = 'hidden';
                     if (bedZzz) bedZzz.style.visibility = 'hidden';
                     
-                    animateAgentWalk(agentKey, emoji, bed, workstation, () => {
+                    animateAgentWalkWithHydration(agentKey, emoji, bed, workstation, () => {
                         workstation.classList.add('working');
                         if (bed) bed.classList.add('working');
                         const badge = workstation.querySelector('.ticket-badge');
@@ -2963,7 +3200,7 @@
                     const bedAvatar = bed.querySelector('.sleeping-agent');
                     const bedZzz = bed.querySelector('.zzz');
                     
-                    animateAgentWalk(agentKey, emoji, workstation, bed, () => {
+                    animateAgentWalkWithHydration(agentKey, emoji, workstation, bed, () => {
                         workstation.classList.remove('working');
                         if (bed) bed.classList.remove('working');
                         const badge = workstation.querySelector('.ticket-badge');
@@ -3113,10 +3350,9 @@
         
         function useDemoData() {
             console.log('🦜 Using demo data (worker unavailable)');
-            // Test data - Beta has task again to test slower speed
+            // Test data - Beta done, walking back to bed
             currentTasks = [
-                { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' },
-                { taskId: 'OFF-1-1', assignee: 'Beta', status: 'In Progress', url: 'https://notion.so/beta-walk-test' }
+                { taskId: 'CHATTING', assignee: 'Alice', status: 'In Progress', url: 'https://t.me/c/3753239152' }
             ];
             lastSyncTime = new Date().toISOString();
             lastSyncError = 'Worker unavailable - using demo data';
@@ -3150,13 +3386,277 @@
             window.open(notionUrl, '_blank');
         }
 
-        // Auto-sync every 30 seconds
+        // Animation Hydration System - OFF-RT-4
+        class AnimationHydrationManager {
+            constructor() {
+                this.ANIMATION_DURATION = 3000; // 3 seconds per animation
+                this.STORAGE_KEY = 'ongoingAnimations';
+            }
+            
+            // Store animation state when starting
+            storeAnimationState(agentId, startPosition, endPosition, startTime = Date.now()) {
+                const animations = this.getStoredAnimations();
+                const existing = animations.findIndex(a => a.agentId === agentId);
+                
+                const animationData = {
+                    agentId,
+                    startPosition,
+                    endPosition, 
+                    startTime,
+                    duration: this.ANIMATION_DURATION
+                };
+                
+                if (existing >= 0) {
+                    animations[existing] = animationData;
+                } else {
+                    animations.push(animationData);
+                }
+                
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(animations));
+                console.log(`💾 Stored animation state for ${agentId}: ${startPosition} → ${endPosition}`);
+            }
+            
+            // Get stored animations
+            getStoredAnimations() {
+                try {
+                    return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]');
+                } catch (e) {
+                    console.warn('⚠️ Invalid animation storage data, clearing');
+                    localStorage.removeItem(this.STORAGE_KEY);
+                    return [];
+                }
+            }
+            
+            // Clean up completed animation
+            clearAnimationState(agentId) {
+                const animations = this.getStoredAnimations();
+                const filtered = animations.filter(a => a.agentId !== agentId);
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filtered));
+                console.log(`🧹 Cleared animation state for ${agentId}`);
+            }
+            
+            // Hydrate animations on page load
+            hydrateOngoingAnimations() {
+                const animations = this.getStoredAnimations();
+                const now = Date.now();
+                const activeAnimations = [];
+                
+                console.log(`🔄 Hydrating ${animations.length} stored animations...`);
+                
+                animations.forEach(anim => {
+                    const elapsed = now - anim.startTime;
+                    const remaining = anim.duration - elapsed;
+                    
+                    if (remaining > 0) {
+                        // Animation still ongoing
+                        console.log(`🎬 Hydrating ${anim.agentId}: ${elapsed}ms elapsed, ${remaining}ms remaining`);
+                        this.resumeAnimation(anim, elapsed, remaining);
+                        activeAnimations.push(anim);
+                    } else {
+                        // Animation should be complete - snap to final position
+                        console.log(`⚡ Snapping ${anim.agentId} to final position (animation expired)`);
+                        this.snapToFinalPosition(anim.agentId, anim.endPosition);
+                    }
+                });
+                
+                // Update storage with only active animations
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(activeAnimations));
+            }
+            
+            // Resume animation from intermediate position
+            resumeAnimation(animData, elapsed, remaining) {
+                const agentKey = findAgentKey(animData.agentId) || animData.agentId.toLowerCase();
+                const emoji = agentData[agentKey]?.emoji || '🤖';
+                
+                // Get start and end elements
+                const startEl = animData.startPosition === 'desk' ?
+                    document.querySelector(`.workstation[data-agent="${agentKey}"]`) :
+                    document.querySelector(`.cot[data-agent="${agentKey}"]`);
+                const endEl = animData.endPosition === 'desk' ?
+                    document.querySelector(`.workstation[data-agent="${agentKey}"]`) :
+                    document.querySelector(`.cot[data-agent="${agentKey}"]`);
+                
+                if (!startEl || !endEl) {
+                    console.warn(`⚠️ Cannot resume animation for ${agentKey} - missing elements`);
+                    this.clearAnimationState(animData.agentId);
+                    return;
+                }
+                
+                // Calculate intermediate position
+                const progress = elapsed / animData.duration;
+                const startPos = getElementCenter(startEl);
+                const endPos = getElementCenter(endEl);
+                
+                // Interpolate position
+                const currentPos = {
+                    x: startPos.x + (endPos.x - startPos.x) * progress,
+                    y: startPos.y + (endPos.y - startPos.y) * progress
+                };
+                
+                // Create walking sprite at intermediate position
+                const walker = document.createElement('div');
+                walker.className = 'walking-agent walking';
+                walker.textContent = emoji;
+                walker.style.left = currentPos.x + 'px';
+                walker.style.top = currentPos.y + 'px';
+                walker.style.fontSize = '40px';
+                walker.style.background = 'rgba(255,255,0,0.8)';
+                walker.style.borderRadius = '50%';
+                walker.style.padding = '5px';
+                walker.style.zIndex = '1000';
+                
+                const container = document.querySelector('.office-container');
+                container.appendChild(walker);
+                
+                console.log(`🎭 Resuming animation for ${agentKey} from ${Math.round(progress * 100)}% complete`);
+                
+                // Continue animation from current position
+                this.animateToTarget(walker, currentPos, endPos, remaining, () => {
+                    walker.remove();
+                    this.snapToFinalPosition(animData.agentId, animData.endPosition);
+                    this.clearAnimationState(animData.agentId);
+                });
+            }
+            
+            // Animate from current position to target
+            animateToTarget(walker, fromPos, toPos, duration, callback) {
+                const startTime = Date.now();
+                const dx = toPos.x - fromPos.x;
+                const dy = toPos.y - fromPos.y;
+                
+                const animate = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Smooth easing
+                    const easedProgress = this.easeInOutQuad(progress);
+                    
+                    const currentX = fromPos.x + dx * easedProgress;
+                    const currentY = fromPos.y + dy * easedProgress;
+                    
+                    walker.style.left = currentX + 'px';
+                    walker.style.top = currentY + 'px';
+                    
+                    if (progress >= 1) {
+                        callback();
+                    } else {
+                        requestAnimationFrame(animate);
+                    }
+                };
+                
+                animate();
+            }
+            
+            // Smooth easing function
+            easeInOutQuad(t) {
+                return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            }
+            
+            // Snap agent to final position without animation
+            snapToFinalPosition(agentId, position) {
+                const agentKey = findAgentKey(agentId) || agentId.toLowerCase();
+                const workstation = document.querySelector(`.workstation[data-agent="${agentKey}"]`);
+                const bed = document.querySelector(`.cot[data-agent="${agentKey}"]`);
+                
+                console.log(`⚡ Snapping ${agentKey} to ${position}`);
+                
+                if (position === 'desk' && workstation) {
+                    workstation.classList.add('working');
+                    const statusDot = workstation.querySelector('.status-dot');
+                    if (statusDot) statusDot.classList.add('working');
+                    if (bed) bed.classList.add('working');
+                    
+                    // Hide bed avatar
+                    const bedAvatar = bed?.querySelector('.sleeping-agent');
+                    const bedZzz = bed?.querySelector('.zzz');
+                    if (bedAvatar) bedAvatar.style.visibility = 'hidden';
+                    if (bedZzz) bedZzz.style.visibility = 'hidden';
+                    
+                } else if (position === 'bed' && workstation) {
+                    workstation.classList.remove('working');
+                    const statusDot = workstation.querySelector('.status-dot');
+                    if (statusDot) statusDot.classList.remove('working');
+                    if (bed) bed.classList.remove('working');
+                    
+                    // Show bed avatar
+                    const bedAvatar = bed?.querySelector('.sleeping-agent');
+                    const bedZzz = bed?.querySelector('.zzz');
+                    if (bedAvatar) bedAvatar.style.visibility = 'visible';
+                    if (bedZzz) bedZzz.style.visibility = 'visible';
+                    
+                    // Clear task badge
+                    const badge = workstation.querySelector('.ticket-badge');
+                    if (badge) {
+                        badge.textContent = '';
+                        badge.style.display = 'none';
+                    }
+                }
+            }
+            
+            // Clean up expired animations (called periodically)
+            cleanupExpiredAnimations() {
+                const animations = this.getStoredAnimations();
+                const now = Date.now();
+                const active = animations.filter(anim => {
+                    const elapsed = now - anim.startTime;
+                    return elapsed < anim.duration + 5000; // 5 second grace period
+                });
+                
+                if (active.length !== animations.length) {
+                    console.log(`🧹 Cleaned up ${animations.length - active.length} expired animations`);
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(active));
+                }
+            }
+        }
+        
+        // Initialize hydration manager
+        const hydrationManager = new AnimationHydrationManager();
+        
+        // Enhanced animate agent walk with hydration support
+        function animateAgentWalkWithHydration(agentKey, emoji, fromEl, toEl, callback) {
+            const agentId = agentKey.charAt(0).toUpperCase() + agentKey.slice(1);
+            const startPos = fromEl.classList.contains('workstation') ? 'desk' : 'bed';
+            const endPos = toEl.classList.contains('workstation') ? 'desk' : 'bed';
+            
+            // Store animation state
+            hydrationManager.storeAnimationState(agentId, startPos, endPos);
+            
+            // Run original animation
+            animateAgentWalk(agentKey, emoji, fromEl, toEl, () => {
+                // Clear stored state on completion
+                hydrationManager.clearAnimationState(agentId);
+                if (callback) callback();
+            });
+        }
+        
+        // Auto-sync every 30 seconds with WebSocket integration
         function startBadgeSync() {
-            syncBadgesFromWorker(); // Initial sync
-            setInterval(syncBadgesFromWorker, 30000);
+            // Try WebSocket first
+            wsManager.connect();
+            
+            // Fallback to HTTP polling if WebSocket fails
+            wsManager.on('fallback', () => {
+                console.log('📡 Starting HTTP polling fallback');
+                syncBadgesFromWorker(); // Initial sync
+                setInterval(syncBadgesFromWorker, 30000);
+            });
+            
+            // WebSocket event handlers
+            wsManager.on('connected', () => {
+                console.log('🔌 WebSocket connected - real-time updates active');
+                // Initial sync over WebSocket
+                syncBadgesFromWorker();
+            });
+            
+            wsManager.on('disconnected', () => {
+                console.log('❌ WebSocket disconnected - attempting reconnect');
+            });
             
             // Update debug panel every 5 seconds
             setInterval(updateDebugPanel, 5000);
+            
+            // Periodic cleanup of expired animations
+            setInterval(() => hydrationManager.cleanupExpiredAnimations(), 30000);
         }
 
         // Update debug panel
@@ -3225,7 +3725,7 @@
             if (bedZzz) bedZzz.style.visibility = 'hidden';
             
             // Test walk from bed to desk
-            animateAgentWalk(agentKey, emoji, bed, workstation, () => {
+            animateAgentWalkWithHydration(agentKey, emoji, bed, workstation, () => {
                 console.log(`✅ ${agentKey} arrived at desk!`);
                 // Show at desk
                 workstation.classList.add('working');
@@ -3233,7 +3733,7 @@
                 // After 3 seconds, walk back to bed
                 setTimeout(() => {
                     workstation.classList.remove('working');
-                    animateAgentWalk(agentKey, emoji, workstation, bed, () => {
+                    animateAgentWalkWithHydration(agentKey, emoji, workstation, bed, () => {
                         console.log(`💤 ${agentKey} back in bed!`);
                         // Show bed avatar again
                         if (bedAvatar) bedAvatar.style.visibility = 'visible';
@@ -3249,7 +3749,47 @@
             tasks: () => currentTasks,
             lastSync: () => lastSyncTime,
             updateDebug: updateDebugPanel,
-            test: window.testSync
+            test: window.testSync,
+            ws: wsManager,
+            hydration: hydrationManager
+        };
+        
+        // OFF-RT-3 & OFF-RT-4: Enhanced debug functions
+        window.testWebSocket = function() {
+            console.log('🧪 Testing WebSocket connection...');
+            if (wsManager.isConnected) {
+                console.log('✅ WebSocket is connected');
+                // Send test message
+                if (wsManager.ws && wsManager.ws.readyState === WebSocket.OPEN) {
+                    wsManager.ws.send(JSON.stringify({
+                        type: 'test',
+                        message: 'Frontend test from Worker-Beta',
+                        timestamp: Date.now()
+                    }));
+                    console.log('📤 Test message sent');
+                }
+            } else {
+                console.log('❌ WebSocket not connected, attempting connection...');
+                wsManager.connect();
+            }
+        };
+        
+        window.testHydration = function(agentKey = 'beta') {
+            console.log(`🧪 Testing hydration with ${agentKey}...`);
+            // Store fake animation state
+            hydrationManager.storeAnimationState(
+                agentKey.charAt(0).toUpperCase() + agentKey.slice(1),
+                'bed',
+                'desk',
+                Date.now() - 1500 // Started 1.5 seconds ago
+            );
+            console.log('💾 Fake animation state stored');
+            
+            // Test hydration
+            setTimeout(() => {
+                hydrationManager.hydrateOngoingAnimations();
+                console.log('🎬 Hydration test complete');
+            }, 100);
         };
     </script>
 
@@ -3641,6 +4181,10 @@
             // Initialize activity feed ticker
             initializeActivityFeed();
             console.log('📰 Activity feed ticker initialized!');
+            
+            // OFF-RT-4: Hydrate ongoing animations from localStorage
+            hydrationManager.hydrateOngoingAnimations();
+            console.log('🎬 Animation hydration completed!');
             
             // Listen to state events for enhanced UI feedback
             window.officeState.on('taskAssigned', (data) => {
