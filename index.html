@@ -2105,17 +2105,28 @@
                 font-size: 16px !important;
             }
         }
-        /* GLOBAL: Hide duplicate agent displays - only portraits gallery */
+        /* GLOBAL: Hide duplicate/floating agent displays */
         .portraits-gallery,
-        .portraits-gallery * {
+        .portraits-gallery *,
+        .floating-agent {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
         }
-        
-        /* Show desks with working agents */
+        /* Hide the decorative window (shows as blank blue box) */
+        .window {
+            display: none !important;
+        }
+        /* Reposition workstation-row as a vertical desk column left of cots */
         .workstation-row {
             display: flex !important;
+            flex-direction: column !important;
+            position: absolute !important;
+            top: 180px !important;
+            right: 100px !important;
+            left: auto !important;
+            bottom: auto !important;
+            gap: 8px !important;
         }
     </style>
 </head>
@@ -2246,27 +2257,7 @@
             <div class="door-handle"></div>
         </div>
         
-        <!-- Desk Workstations inside the room -->
-        <div class="workstation working" data-agent="alice" style="position: absolute; bottom: 120px; left: 80px; width: 60px; height: 45px; background: #8d6e63; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; z-index: 5;">
-            <div class="ticket-badge" onclick="openNotionTask(this, event)" style="position: absolute; top: -8px; right: -8px; background: #f44336; color: white; font-size: 8px; padding: 2px 4px; border-radius: 3px; min-width: 16px; text-align: center; cursor: pointer; z-index: 10;">OFFICE-1-1</div>
-            <div class="status-dot working" style="width: 8px; height: 8px; border-radius: 50%; background: #4caf50; position: absolute; top: 2px; left: 2px;"></div>
-            <span class="agent-icon" style="font-size: 16px;">🦜</span>
-            <span class="agent-name" style="font-size: 8px; color: #333; margin-top: 2px;">Alice</span>
-        </div>
-        
-        <div class="workstation working" data-agent="alpha" style="position: absolute; bottom: 120px; left: 200px; width: 60px; height: 45px; background: #8d6e63; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; z-index: 5;">
-            <div class="ticket-badge" onclick="openNotionTask(this, event)" style="position: absolute; top: -8px; right: -8px; background: #f44336; color: white; font-size: 8px; padding: 2px 4px; border-radius: 3px; min-width: 16px; text-align: center; cursor: pointer; z-index: 10;">OFFICE-1-2</div>
-            <div class="status-dot working" style="width: 8px; height: 8px; border-radius: 50%; background: #4caf50; position: absolute; top: 2px; left: 2px;"></div>
-            <span class="agent-icon" style="font-size: 16px;">🐺</span>
-            <span class="agent-name" style="font-size: 8px; color: #333; margin-top: 2px;">Alpha</span>
-        </div>
-        
-        <div class="workstation" data-agent="beta" style="position: absolute; bottom: 120px; left: 320px; width: 60px; height: 45px; background: #8d6e63; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; z-index: 5;">
-            <div class="ticket-badge" onclick="openNotionTask(this, event)" style="position: absolute; top: -8px; right: -8px; background: #666; color: white; font-size: 8px; padding: 2px 4px; border-radius: 3px; min-width: 16px; text-align: center; cursor: pointer; z-index: 10;"></div>
-            <div class="status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #666; position: absolute; top: 2px; left: 2px;"></div>
-            <span class="agent-icon" style="font-size: 16px;">🦊</span>
-            <span class="agent-name" style="font-size: 8px; color: #333; margin-top: 2px;">Beta</span>
-        </div>
+        <!-- Hardcoded desks removed - using workstation-row only -->
         
         <!-- Workstations -->
         <div class="workstation-row">
@@ -2326,8 +2317,7 @@
             </div>
         </div>
         
-        <!-- Floating agents (when not at desk) -->
-        <div class="floating-agent" id="agentAlpha" data-name="Alpha" style="display: none;">🐺</div>
+        <!-- Floating agents removed -->
         
         <!-- Status Panel -->
         <!-- Status panel removed - use gear icon for debug info -->
@@ -4630,12 +4620,9 @@
             startBadgeSync();
             console.log('🎯 Real-time badge sync initialized!');
             
-            // Initialize agent location awareness
-            initializeAgentLocations();
-            console.log('🗺️ Agent location awareness initialized!');
-            
-            // Start periodic shuffling of idle agents
-            setInterval(shuffleIdleAgents, 45000); // Every 45 seconds
+            // Agent location awareness disabled - agents stay in cots/desks only
+            // initializeAgentLocations();
+            // setInterval(shuffleIdleAgents, 45000);
             
             // Initialize activity feed ticker
             initializeActivityFeed();
