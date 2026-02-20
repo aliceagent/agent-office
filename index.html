@@ -2119,7 +2119,14 @@
         }
         /* Reposition workstation-row as a vertical desk column left of cots */
         .workstation-row {
-            display: none !important;
+            display: flex !important;
+            flex-direction: column !important;
+            position: absolute !important;
+            top: 180px !important;
+            right: 110px !important;  /* left of cots */
+            left: auto !important;
+            bottom: auto !important;
+            gap: 8px !important;
         }
     </style>
 </head>
