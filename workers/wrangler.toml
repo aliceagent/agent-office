@@ -1,9 +1,9 @@
-name = "office-notion-proxy"
+name = "office-agent-events"
 main = "src/index.js"
 compatibility_date = "2024-01-15"
 
 [env.production]
-name = "office-notion-proxy"
+name = "office-agent-events"
 
 [vars]
 NOTION_DATABASE_ID = "2fe419064d3081bc8155ee2719c1d365"

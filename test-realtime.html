@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Office Canvas Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .canvas-area {
+            background: linear-gradient(135deg, #f5f0e8 0%, #e8e0d5 100%);
+            border-radius: 12px;
+            position: relative;
+            height: 600px;
+            overflow: hidden;
+        }
+
+        .control-panel {
+            background: #2a2a3e;
+            border-radius: 12px;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .status-display {
+            margin-bottom: 20px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .connected { background-color: #4caf50; }
+        .disconnected { background-color: #f44336; }
+        .fallback { background-color: #ff9800; }
+
+        button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .agent {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.1s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            background: white;
+            cursor: pointer;
+        }
+
+        .agent.walking {
+            animation: bounce 0.6s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-10px) scale(1.1); }
+        }
+
+        .location-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #666;
+            border-radius: 50%;
+            background: rgba(102, 102, 102, 0.2);
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+
+        .bed { border-color: #2196F3; background-color: rgba(33, 150, 243, 0.2); }
+        .desk { border-color: #FF9800; background-color: rgba(255, 152, 0, 0.2); }
+
+        .event-log {
+            background: #1a1a2e;
+            border-radius: 6px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+
+        .event-item {
+            margin: 2px 0;
+            padding: 2px 5px;
+            border-left: 2px solid #4caf50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .endpoint-info {
+            font-size: 12px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #1a1a2e;
+            border-radius: 6px;
+        }
+
+        .endpoint-info code {
+            background: #2a2a3e;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="canvas-area" id="canvasArea">
+            <!-- Location markers -->
+            <div class="location-marker bed" style="left: 760px; top: 160px;" title="cot-1">🛏️</div>
+            <div class="location-marker bed" style="left: 760px; top: 175px;" title="cot-2">🛏️</div>
+            <div class="location-marker bed" style="left: 760px; top: 190px;" title="cot-3">🛏️</div>
+            
+            <div class="location-marker desk" style="left: 30px; top: 500px;" title="desk-alice">🖥️</div>
+            <div class="location-marker desk" style="left: 100px; top: 500px;" title="desk-alpha">🖥️</div>
+            <div class="location-marker desk" style="left: 170px; top: 500px;" title="desk-beta">🖥️</div>
+            <div class="location-marker desk" style="left: 240px; top: 500px;" title="desk-gamma">🖥️</div>
+            
+            <!-- Agents will be added dynamically -->
+        </div>
+
+        <div class="control-panel">
+            <h3>🤖 Real-time Office Canvas</h3>
+            
+            <div class="status-display">
+                <div class="status-item">
+                    <span>Connection:</span>
+                    <span id="connectionStatus">
+                        <span class="status-indicator disconnected"></span>
+                        Connecting...
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span>Mode:</span>
+                    <span id="connectionMode">WebSocket</span>
+                </div>
+                <div class="status-item">
+                    <span>Events:</span>
+                    <span id="eventCount">0</span>
+                </div>
+                <div class="status-item">
+                    <span>Animations:</span>
+                    <span id="animationCount">0</span>
+                </div>
+            </div>
+
+            <div class="endpoint-info">
+                <strong>Endpoints:</strong><br>
+                <code>WebSocket:</code> /ws<br>
+                <code>REST:</code> /api/agent-status<br>
+                <code>Update:</code> /api/agent-update
+            </div>
+
+            <button onclick="testConnection()">Test Connection</button>
+            <button onclick="simulateMovement()">Simulate Beta Movement</button>
+            <button onclick="simulateMultipleMovements()">Multi-agent Test</button>
+            <button onclick="testAnimationCancel()">Test Cancel Animation</button>
+            <button onclick="clearLog()">Clear Event Log</button>
+
+            <div class="event-log" id="eventLog">
+                <div style="color: #666; text-align: center;">Event log will appear here...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the modules -->
+    <script src="walk-animation-engine.js"></script>
+    <script src="realtime-sync.js"></script>
+
+    <script>
+        let syncManager = null;
+        let walkEngine = null;
+        let eventCount = 0;
+        
+        // Agent locations (same as office-state.js)
+        const locations = {
+            'cot-1': { x: 780, y: 180 },
+            'cot-2': { x: 780, y: 195 },  
+            'cot-3': { x: 780, y: 210 },
+            'desk-alice': { x: 50, y: 520 },
+            'desk-alpha': { x: 120, y: 520 },
+            'desk-beta': { x: 190, y: 520 },
+            'desk-gamma': { x: 260, y: 520 }
+        };
+
+        // Initialize the system
+        async function init() {
+            try {
+                // Initialize walk animation engine
+                walkEngine = new WalkAnimationEngine();
+                logEvent('🚶 Walk Animation Engine initialized');
+
+                // Initialize real-time sync
+                syncManager = new RealTimeSyncManager({
+                    wsUrl: 'wss://office-agent-events.agentcaras.workers.dev/ws',
+                    restUrl: 'https://office-agent-events.agentcaras.workers.dev/api/agent-status'
+                });
+
+                // Set up integrations
+                const officeState = { locations }; // Simplified office state
+                syncManager.setIntegrations(walkEngine, officeState);
+
+                // Set up event handlers
+                syncManager.on('agents-sync', handleAgentsSync);
+                syncManager.on('agent-state-change', handleAgentStateChange);
+                syncManager.on('animation-complete', handleAnimationComplete);
+
+                // Connect
+                await syncManager.connect();
+                updateStatus();
+                
+                logEvent('✅ Real-time sync connected');
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                logEvent('❌ Initialization failed: ' + error.message);
+            }
+        }
+
+        function handleAgentsSync(data) {
+            logEvent('📥 Agents sync received');
+            
+            // Update agent positions
+            Object.entries(data.agents).forEach(([agentId, agentState]) => {
+                updateAgentPosition(agentId, agentState);
+            });
+        }
+
+        function handleAgentStateChange(event) {
+            eventCount++;
+            logEvent(`🎯 Agent ${event.agentId}: ${event.previousState?.location || 'unknown'} → ${event.newState.location}`);
+            updateStatus();
+        }
+
+        function handleAnimationComplete(data) {
+            logEvent(`🚶‍♂️ Animation complete: ${data.agentId}`);
+            updateStatus();
+        }
+
+        function updateAgentPosition(agentId, agentState) {
+            let agentElement = document.querySelector(`[data-agent="${agentId}"]`);
+            
+            if (!agentElement) {
+                // Create agent element
+                agentElement = document.createElement('div');
+                agentElement.className = 'agent';
+                agentElement.setAttribute('data-agent', agentId);
+                agentElement.textContent = getAgentIcon(agentId);
+                agentElement.title = agentId;
+                document.getElementById('canvasArea').appendChild(agentElement);
+            }
+
+            // Position agent
+            const location = locations[agentState.location];
+            if (location) {
+                agentElement.style.left = `${location.x}px`;
+                agentElement.style.top = `${location.y}px`;
+            }
+        }
+
+        function getAgentIcon(agentId) {
+            const icons = {
+                alice: '🦜', alpha: '🐺', beta: '🦊', gamma: '🦔',
+                delta: '🦉', epsilon: '🐙', zeta: '🦄', eta: '🐼', theta: '🦝'
+            };
+            return icons[agentId] || '🤖';
+        }
+
+        function updateStatus() {
+            const status = syncManager ? syncManager.getStatus() : { connected: false, usingFallback: false };
+            const statusEl = document.getElementById('connectionStatus');
+            const modeEl = document.getElementById('connectionMode');
+            
+            if (status.connected) {
+                statusEl.innerHTML = '<span class="status-indicator connected"></span>Connected';
+                modeEl.textContent = 'WebSocket';
+            } else if (status.usingFallback) {
+                statusEl.innerHTML = '<span class="status-indicator fallback"></span>Fallback';
+                modeEl.textContent = 'REST Polling';
+            } else {
+                statusEl.innerHTML = '<span class="status-indicator disconnected"></span>Disconnected';
+                modeEl.textContent = 'None';
+            }
+
+            document.getElementById('eventCount').textContent = eventCount;
+            document.getElementById('animationCount').textContent = 
+                walkEngine ? walkEngine.getActiveAnimations().length : 0;
+        }
+
+        function logEvent(message) {
+            const log = document.getElementById('eventLog');
+            const item = document.createElement('div');
+            item.className = 'event-item';
+            item.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            log.appendChild(item);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function testConnection() {
+            logEvent('🔄 Testing connection...');
+            try {
+                const response = await fetch('https://office-agent-events.agentcaras.workers.dev/health');
+                const data = await response.json();
+                logEvent('✅ Health check passed: ' + JSON.stringify(data));
+            } catch (error) {
+                logEvent('❌ Health check failed: ' + error.message);
+            }
+        }
+
+        async function simulateMovement() {
+            logEvent('🧪 Simulating Beta movement...');
+            try {
+                const response = await fetch('https://office-agent-events.agentcaras.workers.dev/api/test-movement', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agentId: 'beta' })
+                });
+                const data = await response.json();
+                logEvent('✅ Movement simulation started');
+            } catch (error) {
+                logEvent('❌ Movement simulation failed: ' + error.message);
+            }
+        }
+
+        async function simulateMultipleMovements() {
+            logEvent('🧪 Simulating multiple agent movements...');
+            const agents = ['beta', 'gamma'];
+            
+            for (const agentId of agents) {
+                try {
+                    await fetch('https://office-agent-events.agentcaras.workers.dev/api/test-movement', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ agentId })
+                    });
+                    logEvent(`🚶 Started movement for ${agentId}`);
+                } catch (error) {
+                    logEvent(`❌ Failed to start movement for ${agentId}: ${error.message}`);
+                }
+            }
+        }
+
+        function testAnimationCancel() {
+            if (walkEngine) {
+                const activeAnimations = walkEngine.getActiveAnimations();
+                if (activeAnimations.length > 0) {
+                    const agentId = activeAnimations[0];
+                    walkEngine.cancelAnimation(agentId);
+                    logEvent(`❌ Canceled animation for ${agentId}`);
+                } else {
+                    logEvent('ℹ️ No active animations to cancel');
+                }
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('eventLog').innerHTML = 
+                '<div style="color: #666; text-align: center;">Event log cleared...</div>';
+            eventCount = 0;
+            updateStatus();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Update status every second
+        setInterval(updateStatus, 1000);
+    </script>
+</body>
+</html>
