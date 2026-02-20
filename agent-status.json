@@ -30,15 +30,15 @@
       "task": "OFF-4-1"
     },
     "eta": {
-      "status": "working",
-      "task": "OFF-TEST-ANIM"
+      "status": "sleeping",
+      "task": null
     },
     "theta": {
       "status": "sleeping",
       "task": null
     }
   },
-  "taskCount": 13,
-  "timestamp": 1771561506510,
-  "updatedAt": "2026-02-20T06:25:06.510795"
+  "taskCount": 12,
+  "timestamp": 1771561604612,
+  "updatedAt": "2026-02-20T06:26:44.612256"
 }
