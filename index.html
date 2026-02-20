@@ -4002,14 +4002,19 @@
         
         // Auto-sync every 30 seconds with WebSocket integration
         function startBadgeSync() {
-            // Try WebSocket first
+            // IMMEDIATE SYNC - don't wait for WebSocket
+            console.log('🚀 Starting immediate sync...');
+            syncBadgesFromWorker();
+            
+            // Also start regular polling (WebSocket is unreliable)
+            setInterval(syncBadgesFromWorker, 30000); // Poll every 30 seconds
+            
+            // Try WebSocket as bonus (but don't depend on it)
             wsManager.connect();
             
-            // Fallback to HTTP polling if WebSocket fails
+            // Fallback to faster polling if WebSocket fails
             wsManager.on('fallback', () => {
-                console.log('📡 Starting HTTP polling fallback');
-                syncBadgesFromWorker(); // Initial sync
-                setInterval(syncBadgesFromWorker, 10000); // Poll every 10 seconds
+                console.log('📡 WebSocket failed, using HTTP polling');
             });
             
             // WebSocket event handlers
