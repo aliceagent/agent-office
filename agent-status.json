@@ -1,0 +1,44 @@
+{
+  "success": true,
+  "agents": {
+    "alice": {
+      "status": "sleeping",
+      "task": null
+    },
+    "alpha": {
+      "status": "working",
+      "task": "CHN-2-10: DOC/DOCX File Support"
+    },
+    "beta": {
+      "status": "working",
+      "task": "REJ-3-1"
+    },
+    "gamma": {
+      "status": "working",
+      "task": "GAMMA-LIVE-TEST"
+    },
+    "delta": {
+      "status": "sleeping",
+      "task": null
+    },
+    "epsilon": {
+      "status": "working",
+      "task": "EPSILON-QA-FIX"
+    },
+    "zeta": {
+      "status": "sleeping",
+      "task": null
+    },
+    "eta": {
+      "status": "sleeping",
+      "task": null
+    },
+    "theta": {
+      "status": "sleeping",
+      "task": null
+    }
+  },
+  "taskCount": 10,
+  "timestamp": 1771549880181,
+  "updatedAt": "2026-02-20T03:11:20.181571"
+}

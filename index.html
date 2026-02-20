@@ -2716,7 +2716,8 @@
     <!-- 🎯 REAL-TIME BADGE SYNC SYSTEM -->
     <script>
         // Real-time badge sync from Cloudflare Worker with WebSocket support
-        const WORKER_ENDPOINT = 'https://mission-control-sync.jonathancaras.workers.dev/';
+        // Static JSON file - updated by cron job, no external service needed
+        const WORKER_ENDPOINT = './agent-status.json';
         const WS_ENDPOINT = 'wss://mission-control-sync.jonathancaras.workers.dev/ws';
         const AGENT_NAME_MAP = {
             'alice': ['Alice', 'alice', 'ALICE'],
@@ -2972,9 +2973,11 @@
         async function syncBadgesFromWorker() {
             console.log('🔄 syncBadgesFromWorker called');
             try {
-                console.log('🔄 Fetching from:', WORKER_ENDPOINT);
+                // Add cache-busting to ensure fresh data
+                const url = WORKER_ENDPOINT + '?t=' + Date.now();
+                console.log('🔄 Fetching from:', url);
                 
-                const response = await fetch(WORKER_ENDPOINT);
+                const response = await fetch(url);
                 console.log('🔄 Response status:', response.status);
                 
                 if (!response.ok) {
@@ -2985,23 +2988,78 @@
                 console.log('🔄 Data received:', data);
                 
                 if (!data.success) {
-                    throw new Error(data.error || 'Worker returned error');
+                    throw new Error(data.error || 'Status file returned error');
                 }
 
-                currentTasks = data.tasks;
-                lastSyncTime = new Date().toISOString();
+                lastSyncTime = data.updatedAt || new Date().toISOString();
                 lastSyncError = null; // Clear error on success
                 
-                updateAgentBadges(data.tasks);
-                console.log(`✅ Synced ${data.tasks.length} tasks from Mission Control`);
+                // Handle new format: data.agents object instead of data.tasks array
+                if (data.agents) {
+                    updateAgentBadgesFromStatus(data.agents);
+                    console.log(`✅ Synced ${data.taskCount || 0} active tasks at ${lastSyncTime}`);
+                } else if (data.tasks) {
+                    // Fallback for old format
+                    currentTasks = data.tasks;
+                    updateAgentBadges(data.tasks);
+                    console.log(`✅ Synced ${data.tasks.length} tasks from Mission Control`);
+                }
                 updateDebugPanel();
                 
             } catch (error) {
                 console.error('❌ Badge sync failed:', error);
                 lastSyncError = error.message || 'Unknown error';
-                console.log('🔄 Using demo data with test tasks...');
-                // Fallback to demo data if worker unavailable
-                useDemoData();
+                console.log('🔄 Continuing with current state...');
+                updateDebugPanel();
+            }
+        }
+        
+        // Handle new agent status format
+        function updateAgentBadgesFromStatus(agents) {
+            for (const [agentKey, agentData] of Object.entries(agents)) {
+                const workstation = document.querySelector(`[data-agent="${agentKey}"]`);
+                const cot = document.querySelector(`.cot[data-agent="${agentKey}"]`);
+                
+                if (!workstation) continue;
+                
+                const badge = workstation.querySelector('.ticket-badge');
+                const statusDot = workstation.querySelector('.status-dot');
+                const isWorking = agentData.status === 'working';
+                const wasWorking = previousAgentStates[agentKey]?.status === 'working';
+                
+                // Update badge
+                if (agentData.task) {
+                    badge.textContent = agentData.task;
+                    badge.style.display = 'block';
+                } else {
+                    badge.textContent = '';
+                    badge.style.display = 'none';
+                }
+                
+                // Update working status classes
+                if (isWorking) {
+                    workstation.classList.add('working');
+                    if (statusDot) statusDot.classList.add('working');
+                } else {
+                    workstation.classList.remove('working');
+                    if (statusDot) statusDot.classList.remove('working');
+                }
+                
+                // Trigger animations on state change (only if we have previous state)
+                if (previousAgentStates[agentKey] !== undefined) {
+                    if (!wasWorking && isWorking && cot && workstation) {
+                        // Agent started working: animate bed → desk
+                        console.log(`🚶 ${agentKey} waking up, walking to desk...`);
+                        animateAgentWalk(agentKey, 'wakeup');
+                    } else if (wasWorking && !isWorking && cot && workstation) {
+                        // Agent finished working: animate desk → bed
+                        console.log(`🚶 ${agentKey} finished, walking to bed...`);
+                        animateAgentWalk(agentKey, 'sleep');
+                    }
+                }
+                
+                // Store current state for next comparison
+                previousAgentStates[agentKey] = { ...agentData };
             }
         }
 
@@ -3638,7 +3696,7 @@
             wsManager.on('fallback', () => {
                 console.log('📡 Starting HTTP polling fallback');
                 syncBadgesFromWorker(); // Initial sync
-                setInterval(syncBadgesFromWorker, 30000);
+                setInterval(syncBadgesFromWorker, 10000); // Poll every 10 seconds
             });
             
             // WebSocket event handlers
