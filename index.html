@@ -2275,12 +2275,7 @@
         <div class="floating-agent" id="agentAlpha" data-name="Alpha" style="display: none;">🐺</div>
         
         <!-- Status Panel -->
-        <div class="status-panel">
-            <h3>📊 Office Status</h3>
-            <div class="status-item"><span class="icon">🦜</span> Alice — Working</div>
-            <div class="status-item"><span class="icon">🐺</span> Alpha — Idle</div>
-            <div class="status-item"><span class="icon">🦊</span> Beta — Off</div>
-        </div>
+        <!-- Status panel removed - use gear icon for debug info -->
     </div>
     
     <!-- Debug Toggle Button (Gear) -->
@@ -3301,13 +3296,15 @@
         const wsManager = new WebSocketManager();
 
         async function syncBadgesFromWorker() {
-            console.log('🔄 syncBadgesFromWorker called');
+            console.log('🔄 syncBadgesFromWorker called at', new Date().toLocaleTimeString());
             try {
-                // Add cache-busting to ensure fresh data
-                const url = WORKER_ENDPOINT + '?t=' + Date.now();
-                console.log('🔄 Fetching from:', url);
+                // Strong cache-busting
+                const url = WORKER_ENDPOINT + '?nocache=' + Date.now() + Math.random();
                 
-                const response = await fetch(url);
+                const response = await fetch(url, {
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
                 console.log('🔄 Response status:', response.status);
                 
                 if (!response.ok) {
@@ -4037,8 +4034,9 @@
             console.log('🚀 Starting immediate sync...');
             syncBadgesFromWorker();
             
-            // Also start regular polling (WebSocket is unreliable)
-            setInterval(syncBadgesFromWorker, 30000); // Poll every 30 seconds
+            // Poll every 15 seconds for responsive updates
+            setInterval(syncBadgesFromWorker, 15000);
+            console.log('📡 Polling started (every 15s)');
             
             // Try WebSocket as bonus (but don't depend on it)
             wsManager.connect();
