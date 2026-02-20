@@ -3355,14 +3355,19 @@
                 
                 // Trigger animations on state change (only if we have previous state)
                 if (previousAgentStates[agentKey] !== undefined) {
+                    const emoji = agentData.emoji || '🤖';
                     if (!wasWorking && isWorking && cot && workstation) {
                         // Agent started working: animate bed → desk
                         console.log(`🚶 ${agentKey} waking up, walking to desk...`);
-                        animateAgentWalk(agentKey, 'wakeup');
+                        animateAgentWalk(agentKey, emoji, cot, workstation, () => {
+                            console.log(`✅ ${agentKey} arrived at desk`);
+                        });
                     } else if (wasWorking && !isWorking && cot && workstation) {
                         // Agent finished working: animate desk → bed
                         console.log(`🚶 ${agentKey} finished, walking to bed...`);
-                        animateAgentWalk(agentKey, 'sleep');
+                        animateAgentWalk(agentKey, emoji, workstation, cot, () => {
+                            console.log(`✅ ${agentKey} back in bed`);
+                        });
                     }
                 }
                 
