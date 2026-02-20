@@ -14,8 +14,8 @@
       "task": "REJ-3-1"
     },
     "gamma": {
-      "status": "sleeping",
-      "task": null
+      "status": "working",
+      "task": "OFF-BUG-1"
     },
     "delta": {
       "status": "sleeping",
@@ -38,7 +38,7 @@
       "task": null
     }
   },
-  "taskCount": 8,
-  "timestamp": 1771601281079,
-  "updatedAt": "2026-02-20T17:28:01.079858"
+  "taskCount": 14,
+  "timestamp": 1771601572017,
+  "updatedAt": "2026-02-20T17:32:52.017407"
 }
