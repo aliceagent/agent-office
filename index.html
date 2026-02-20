@@ -2117,19 +2117,31 @@
         .window {
             display: none !important;
         }
-        /* Workstation-row: vertical column in the floor area, right side */
+        /* Workstation-row: aligned with cots-area — desktop */
         .workstation-row {
             display: flex !important;
             flex-direction: column !important;
             position: absolute !important;
-            top: 38% !important;      /* below the wall/bookshelf */
-            right: 110px !important;  /* left of cots */
+            top: 180px !important;
+            right: 110px !important;
             left: auto !important;
             bottom: auto !important;
             gap: 8px !important;
         }
-        /* Only show desks for WORKING agents — hide empty desks */
-        .workstation:not(.working) {
+        /* Mobile: match cots-area mobile positioning (left: 5%, top: 45%) */
+        @media (max-width: 768px) {
+            .workstation-row {
+                top: 45% !important;
+                right: 5% !important;
+                left: auto !important;
+                transform: translateY(-50%) !important;
+            }
+        }
+        /* Sleeping desks: show empty desk, hide agent icon + badge */
+        .workstation:not(.working) .agent-icon,
+        .workstation:not(.working) .agent-name,
+        .workstation:not(.working) .ticket-badge,
+        .workstation:not(.working) .status-dot {
             display: none !important;
         }
     </style>
