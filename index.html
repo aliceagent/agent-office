@@ -76,11 +76,18 @@
             
             /* HIDE UI clutter */
             .status-panel,
+            /* Achievements/trophy removed */
             .trophy-case,
             .trophy-button,
             .trophy-icon,
             .trophy-panel,
             #trophy-case,
+            .achievements-modal,
+            [class*="achievement"],
+            [class*="trophy"] {
+                display: none !important;
+            }
+            .trophy-case-hidden,
             .sound-toggle,
             .mail-chute,
             .kitchen,
@@ -3035,8 +3042,7 @@
     <script src="office-state.js"></script>
     
     <!-- 🦉 DELTA'S ACHIEVEMENTS & CELEBRATIONS SYSTEM -->
-    <script src="achievements-system.js"></script>
-    <script src="achievement-enhancements.js"></script>
+    <!-- Achievements removed -->
     
     <!-- 🎯 REAL-TIME BADGE SYNC SYSTEM -->
     <script>
