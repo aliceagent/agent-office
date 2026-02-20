@@ -2,32 +2,32 @@
   "success": true,
   "agents": {
     "alice": {
+      "status": "working",
+      "task": "Chatting with J"
+    },
+    "alpha": {
       "status": "sleeping",
       "task": null
     },
-    "alpha": {
-      "status": "working",
-      "task": "CHN-2-10: DOC/DOCX File Support"
-    },
     "beta": {
-      "status": "working",
-      "task": "REJ-3-1"
+      "status": "sleeping",
+      "task": null
     },
     "gamma": {
-      "status": "working",
-      "task": "GAMMA-LIVE-TEST"
+      "status": "sleeping",
+      "task": null
     },
     "delta": {
       "status": "sleeping",
       "task": null
     },
     "epsilon": {
-      "status": "working",
-      "task": "EPSILON-QA-FIX"
+      "status": "sleeping",
+      "task": null
     },
     "zeta": {
-      "status": "working",
-      "task": "OFF-ANIM-TEST: Animation QA Test"
+      "status": "sleeping",
+      "task": null
     },
     "eta": {
       "status": "sleeping",
@@ -38,7 +38,7 @@
       "task": null
     }
   },
-  "taskCount": 11,
-  "timestamp": 1771550070339,
-  "updatedAt": "2026-02-20T03:14:30.339666"
+  "taskCount": 0,
+  "timestamp": 1771556935095,
+  "updatedAt": "2026-02-20T05:08:55.095415"
 }
