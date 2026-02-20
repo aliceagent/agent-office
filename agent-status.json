@@ -34,11 +34,11 @@
       "task": null
     },
     "theta": {
-      "status": "sleeping",
-      "task": null
+      "status": "working",
+      "task": "OFF-LIVE-TEST"
     }
   },
-  "taskCount": 12,
-  "timestamp": 1771565565443,
-  "updatedAt": "2026-02-20T07:32:45.443535"
+  "taskCount": 13,
+  "timestamp": 1771565586742,
+  "updatedAt": "2026-02-20T07:33:06.742608"
 }
