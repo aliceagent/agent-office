@@ -2128,13 +2128,13 @@
             bottom: auto !important;
             gap: 8px !important;
         }
-        /* Mobile: match cots-area mobile positioning (left: 5%, top: 45%) */
+        /* Mobile: align desks with start of cots column (cots start ~38% from top) */
         @media (max-width: 768px) {
             .workstation-row {
-                top: 45% !important;
+                top: 38% !important;
                 right: 5% !important;
                 left: auto !important;
-                transform: translateY(-50%) !important;
+                transform: none !important;
             }
         }
         /* Sleeping desks: show empty desk, hide agent icon + badge */
