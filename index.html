@@ -3344,13 +3344,15 @@
                     badge.style.display = 'none';
                 }
                 
-                // Update working status classes
+                // Update working status classes (both workstation AND cot)
                 if (isWorking) {
                     workstation.classList.add('working');
                     if (statusDot) statusDot.classList.add('working');
+                    if (cot) cot.classList.add('working'); // Hide from bed
                 } else {
                     workstation.classList.remove('working');
                     if (statusDot) statusDot.classList.remove('working');
+                    if (cot) cot.classList.remove('working'); // Show in bed
                 }
                 
                 // Trigger animations on state change (only if we have previous state)
