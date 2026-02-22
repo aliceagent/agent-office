@@ -7,7 +7,7 @@
     },
     "alpha": {
       "status": "working",
-      "task": "CHN-PDF-FIX"
+      "task": "CHN-2-10: DOC/DOCX File Support"
     },
     "beta": {
       "status": "working",
@@ -38,7 +38,7 @@
       "task": null
     }
   },
-  "taskCount": 9,
-  "timestamp": 1771739562059,
-  "updatedAt": "2026-02-22T07:52:42.059851"
+  "taskCount": 8,
+  "timestamp": 1771739861830,
+  "updatedAt": "2026-02-22T07:57:41.830482"
 }
