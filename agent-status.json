@@ -7,7 +7,7 @@
     },
     "alpha": {
       "status": "working",
-      "task": "ALPHA-CHN-10-1"
+      "task": "CHN-2-10: DOC/DOCX File Support"
     },
     "beta": {
       "status": "working",
@@ -38,7 +38,7 @@
       "task": null
     }
   },
-  "taskCount": 9,
-  "timestamp": 1771865566387,
-  "updatedAt": "2026-02-23T18:52:46.387223"
+  "taskCount": 8,
+  "timestamp": 1771865866265,
+  "updatedAt": "2026-02-23T18:57:46.265273"
 }
