@@ -10,8 +10,8 @@
       "task": null
     },
     "beta": {
-      "status": "working",
-      "task": "RES-1"
+      "status": "sleeping",
+      "task": null
     },
     "gamma": {
       "status": "sleeping",
@@ -38,7 +38,7 @@
       "task": null
     }
   },
-  "taskCount": 7,
-  "timestamp": 1772108487841,
-  "updatedAt": "2026-02-26T14:21:27.841592"
+  "taskCount": 6,
+  "timestamp": 1772108816139,
+  "updatedAt": "2026-02-26T14:26:56.139081"
 }
